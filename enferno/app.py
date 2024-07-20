@@ -3,15 +3,14 @@ import inspect
 
 import click
 from flask import Flask, render_template
-from enferno.settings import Config
-from flask_security import Security, SQLAlchemyUserDatastore
-from enferno.user.models import User, Role, WebAuthn
-from enferno.user.forms import ExtendedRegisterForm
-from enferno.extensions import cache, db, mail, debug_toolbar, session, babel, openai
-from enferno.public.views import public
-from enferno.user.views import bp_user
-from enferno.portal.views import portal
+
 import enferno.commands as commands
+from enferno.extensions import cache, db, mail, debug_toolbar, session, babel, openai
+from enferno.portal.views import portal
+from enferno.public.views import public
+from enferno.settings import Config
+from enferno.user.models import User, Role
+from enferno.user.views import bp_user
 
 
 def create_app(config_object=Config):
@@ -32,8 +31,6 @@ def locale_selector():
 def register_extensions(app):
     cache.init_app(app)
     db.init_app(app)
-    user_datastore = SQLAlchemyUserDatastore(db, User, Role, webauthn_model=WebAuthn)
-    security = Security(app, user_datastore,  register_form=ExtendedRegisterForm)
     mail.init_app(app)
     debug_toolbar.init_app(app)
     session.init_app(app)

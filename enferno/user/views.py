@@ -1,9 +1,8 @@
 import datetime
 
 import orjson as json
-from flask import Blueprint, request, flash, g, Response
+from flask import Blueprint, request, Response
 from flask.templating import render_template
-from flask_security import current_user, auth_required, roles_required
 
 from enferno.extensions import db
 from enferno.user.models import User, Role
@@ -14,8 +13,6 @@ PER_PAGE = 20
 
 
 @bp_user.before_request
-@auth_required('session')
-@roles_required('admin')
 def before_request():
     pass
 
@@ -29,7 +26,7 @@ def users():
 
 @bp_user.route('/api/users')
 def api_user():
-    print([role for role in current_user.roles])
+
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', PER_PAGE, type=int)  # Set a default or use a config variable
 

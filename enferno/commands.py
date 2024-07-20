@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Click commands."""
+import os
 
 import click
 from flask.cli import with_appcontext, AppGroup
-from flask_security.utils import hash_password
 from rich.console import Console
 
 from enferno.extensions import db, openai
@@ -27,42 +27,11 @@ def create_db():
 def install():
     """Install a default admin user and add an admin role to it.
     """
-    # check if admin exists
-    from enferno.user.models import Role
-    # create admin role if it doesn't exist
-    admin_role = Role.query.filter(Role.name == 'admin').first()
-    if not admin_role:
-        admin_role = Role(name='admin').save()
 
-    # check if admin users already installed
-    admin_user = User.query.filter(User.roles.any(Role.name == 'admin')).first()
-    if admin_user:
-        print('An admin user already exists: {}'.format(admin_user.username))
-        return
-
-    # else : create a new admin user
-    username = click.prompt('Admin username', default='admin')
-    password = click.prompt('Admin Password (min 8 characters)?', default='enferno09')
-
-    user = User(username=username, password=hash_password(password), active=1)
-    user.roles.append(admin_role)
-    user.save()
-    print('User {} has been created successfuly'.format(username))
+    pass
 
 
-@click.command()
-@click.option('-e', '--email', prompt=True, default=None)
-@click.option('-p', '--password', prompt=True, default=None)
-@with_appcontext
-def create(email, password):
-    """Creates a user using an email.
-    """
-    a = User.query.filter(User.email == email).first()
-    if a != None:
-        print('User already exists!')
-    else:
-        user = User(email=email, password=hash_password(password), active=True)
-        user.save()
+
 
 
 @click.command()
@@ -93,25 +62,6 @@ def add_role(email, role):
         # add role to user
         u.roles.append(r)
 
-
-@click.command()
-@click.option('-e', '--email', prompt=True, default=None)
-@click.option('-p', '--password', hide_input=True, confirmation_prompt=True, prompt=True, default=None)
-@with_appcontext
-def reset(email, password):
-    """Reset a user password
-    """
-    try:
-        pwd = hash_password(password)
-        u = User.query.filter(User.email == email).first()
-        u.password = pwd
-        try:
-            db.session.commit()
-            print('User password has been reset successfully.')
-        except:
-            db.session.rollback()
-    except Exception as e:
-        print('Error resetting user password: %s' % e)
 
 
 @click.command()
