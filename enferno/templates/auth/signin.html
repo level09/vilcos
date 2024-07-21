@@ -1,0 +1,101 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<v-card width="500" class="mt-10">
+    <v-form @submit.prevent="submit" id="loginForm" ref="form">
+        <v-toolbar color="primary" dark text>
+            <v-toolbar-title>Account Login</v-toolbar-title>
+            <v-spacer></v-spacer>
+        </v-toolbar>
+        <v-card-text>
+            <v-text-field
+                v-model="formData.email"
+                label="Email"
+                name="email"
+                prepend-icon="mdi-account"
+                type="text"
+                variant="underlined"
+                :rules="[v => !!v || 'Email is required']"
+            ></v-text-field>
+
+            <v-text-field
+                v-model="formData.password"
+                id="password"
+                label="Password"
+                name="password"
+                prepend-icon="mdi-lock-question"
+                type="password"
+                variant="underlined"
+                :rules="[v => !!v || 'Password is required']"
+            ></v-text-field>
+        </v-card-text>
+
+        <v-card-actions class="px-10 pb-8">
+            <v-spacer></v-spacer>
+            <v-btn variant="elevated" block type="submit" color="primary" :loading="loading">Login</v-btn>
+        </v-card-actions>
+    </v-form>
+</v-card>
+
+<v-snackbar v-model="snackBar" :timeout="3000" :color="snackColor">
+    ${ snackMessage }
+</v-snackbar>
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const { createApp } = Vue;
+    const { createVuetify } = Vuetify;
+    const vuetify = createVuetify();
+
+    const app = createApp({
+        data() {
+            return {
+                formData: {
+                    email: '',
+                    password: ''
+                },
+                drawer: false,
+                snackBar: false,
+                snackMessage: '',
+                snackColor: 'success',
+                menu: null,
+                loading: false
+            };
+        },
+        methods: {
+            showSnack(message, color = 'success') {
+                this.snackMessage = message;
+                this.snackColor = color;
+                this.snackBar = true;
+            },
+            submit() {
+                const form = this.$refs.form;
+                if (form.validate()) {
+                    this.loading = true;
+                    axios.post('/auth/signin', this.formData)
+                        .then(response => {
+                            if (response.data.success) {
+                                this.showSnack(response.data.message);
+                                // Redirect to dashboard or specified URL
+                                window.location.href = response.data.redirect;
+                            } else {
+                                this.showSnack(response.data.message, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            this.showSnack(error.response?.data?.message || 'An error occurred', 'error');
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                        });
+                }
+            }
+        },
+        delimiters: ['${', '}']
+    });
+
+    app.use(vuetify).mount('#app');
+</script>
+{% endblock %}

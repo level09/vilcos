@@ -3,9 +3,9 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Project Enferno</title>
-    <meta name="description" content="A framework for the next decade">
-    <meta name="author" content="Enferno">
+    <title>Welcome to Vilcos Framework</title>
+    <meta name="description" content="Next Gen Framework">
+    <meta name="author" content="Vilcos">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
 
@@ -28,67 +28,13 @@
 
             </v-app-bar-title>
             <v-spacer></v-spacer>
-            {% if current_user.is_authenticated %}
-            <v-menu
-      v-model="menu"
-      :close-on-content-click="false"
-      location="bottom"
-    >
-      <template v-slot:activator="{ props }">
-        <v-btn
 
-          v-bind="props"
-          icon="mdi-account"
-        >
-
-
-
-
-
-        </v-btn>
-      </template>
-
-      <v-card min-width="300" >
-        <v-list>
-          <v-list-item
-            title="{{ current_user.name }}"
-            subtitle="{{ current_user.email}}"
-          >
-            <template v-slot:append>
-            </template>
-          </v-list-item>
-        </v-list>
-
-        <v-divider></v-divider>
-
-        <v-list>
-          <v-list-item>
-           <v-btn href="/dashboard" variant="plain" >My Account</v-btn>
-          </v-list-item>
-
-          <v-list-item>
-            <v-btn href="/change" variant="plain"  >Change Password</v-btn>
-          </v-list-item>
-
-             <v-list-item>
-            <v-btn color="red" href="/logout" variant="plain" > Logout</v-btn>
-          </v-list-item>
-        </v-list>
-
-
-      </v-card>
-    </v-menu>
-
-            {% endif  %}
         </v-app-bar>
 
         <v-navigation-drawer v-model="drawer">
             <v-list>
                 <v-list-item href="/dashboard" title="Dashboard"></v-list-item>
-                {% if current_user.has_role('admin') %}
-                    <v-list-item href="/users" title="Users Management"></v-list-item>
-                    <v-list-item href="/roles" title="Roles Management"></v-list-item>
-                {% endif %}
+
             </v-list>
         </v-navigation-drawer>
 

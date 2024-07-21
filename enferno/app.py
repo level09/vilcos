@@ -5,7 +5,7 @@ import click
 from flask import Flask, render_template
 
 import enferno.commands as commands
-from enferno.extensions import cache, db, mail, debug_toolbar, session, babel, openai
+from enferno.extensions import cache, db, mail, debug_toolbar, session, babel, openai , supabase
 from enferno.portal.views import portal
 from enferno.public.views import public
 from enferno.settings import Config
@@ -36,6 +36,7 @@ def register_extensions(app):
     session.init_app(app)
     babel.init_app(app, locale_selector=locale_selector, default_domain="messages", default_locale="en")
     openai.init_app(app)
+    supabase.init_app(app)
     return None
 
 

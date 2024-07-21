@@ -1,0 +1,111 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<v-card width="500" class="mt-10">
+    <v-form @submit.prevent="submitForm" id="signupForm" ref="form">
+        <v-toolbar color="primary" dark text>
+            <v-toolbar-title>Create Account</v-toolbar-title>
+            <v-spacer></v-spacer>
+        </v-toolbar>
+        <v-card-text>
+            <v-text-field
+                label="Username"
+                v-model="formData.username"
+                prepend-icon="mdi-account"
+                type="text"
+                variant="underlined"
+                :rules="[v => !!v || 'Username is required']"
+            ></v-text-field>
+
+            <v-text-field
+                label="Email"
+                v-model="formData.email"
+                prepend-icon="mdi-email"
+                type="email"
+                variant="underlined"
+                :rules="[
+                    v => !!v || 'Email is required',
+                    v => /.+@.+\..+/.test(v) || 'Email must be valid'
+                ]"
+            ></v-text-field>
+
+            <v-text-field
+                label="Password"
+                v-model="formData.password"
+                prepend-icon="mdi-lock"
+                type="password"
+                variant="underlined"
+                :rules="[v => !!v || 'Password is required']"
+            ></v-text-field>
+
+            <v-text-field
+                label="Confirm Password"
+                v-model="formData.confirmPassword"
+                prepend-icon="mdi-lock-check"
+                type="password"
+                variant="underlined"
+                :rules="[
+                    v => !!v || 'Password confirmation is required',
+                    v => v === formData.password || 'Passwords must match'
+                ]"
+            ></v-text-field>
+        </v-card-text>
+
+        <v-card-actions class="px-10 pb-8">
+            <v-spacer></v-spacer>
+            <v-btn variant="elevated" block type="submit" color="primary">Sign Up</v-btn>
+        </v-card-actions>
+    </v-form>
+</v-card>
+{% endblock %}
+
+{% block js %}
+<script>
+const { createApp } = Vue;
+const { createVuetify } = Vuetify;
+const vuetify = createVuetify();
+
+const app = createApp({
+    data() {
+        return {
+            drawer: false,
+            snackBar: false,
+            snackMessage: '',
+            menu: null,
+            formData: {
+                username: '',
+                email: '',
+                password: '',
+                confirmPassword: ''
+            }
+        };
+    },
+    methods: {
+        showSnack(message) {
+            this.snackMessage = message;
+            this.snackBar = true;
+        },
+        async submitForm() {
+            const form = this.$refs.form;
+            if (form.validate()) {
+                try {
+                    const response = await axios.post('/signup', this.formData);
+                    if (response.data.success) {
+                        this.showSnack('Account created successfully!');
+                        // Redirect to the dashboard or the specified route
+                        window.location.href = response.data.redirect || '/dashboard';
+                    } else {
+                        this.showSnack('Error creating account: ' + response.data.message);
+                    }
+                } catch (error) {
+                    this.showSnack('Error creating account: ' + (error.response?.data?.message || 'An unknown error occurred'));
+                }
+            }
+        }
+    },
+    delimiters: ['${', '}']
+});
+
+app.use(vuetify).mount('#app');
+</script>
+{% endblock %}

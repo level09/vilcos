@@ -1,150 +1,128 @@
-import datetime
+from functools import wraps
+from flask import Blueprint, render_template, redirect, request, session, url_for
+from enferno.extensions import supabase
+from gotrue.errors import AuthApiError
 
-import orjson as json
-from flask import Blueprint, request, Response
-from flask.templating import render_template
+bp_user = Blueprint('users', __name__, url_prefix='/auth', static_folder='../static')
 
-from enferno.extensions import db
-from enferno.user.models import User, Role
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user = session.get('user')
+        access_token = session.get('access_token')
 
-bp_user = Blueprint('users', __name__, static_folder='../static')
+        if not user or not access_token:
+            return redirect(url_for('users.signin', next=request.url))
 
-PER_PAGE = 20
+        try:
+            # Verify the access token with Supabase
+            verified_user = supabase.client.auth.get_user(access_token)
 
+            # Check if the user_id in the session matches the one from the token
+            if verified_user.user.id != user['id']:
+                raise ValueError("User ID mismatch")
 
-@bp_user.before_request
-def before_request():
-    pass
+        except Exception as e:
+            # If verification fails, clear the session and redirect to login
+            session.clear()
+            return redirect(url_for('users.signin', next=request.url))
 
+        return f(*args, **kwargs)
 
-@bp_user.route('/users/')
-def users():
-    roles = Role.query.all()
-    roles = [r.to_dict() for r in roles]
-    return render_template('cms/users.html', roles=roles)
+    return decorated_function
 
+@bp_user.route('/signin', methods=['GET', 'POST'])
+def signin():
+    if request.method == 'POST':
+        data = request.get_json()
+        try:
+            response = supabase.client.auth.sign_in_with_password(
+                credentials={"email": data.get('email'), "password": data.get('password')}
+            )
+            session['access_token'] = response.session.access_token
+            session['user'] = {
+                'id': response.user.id,
+                'email': response.user.email,
+                'role': response.user.role,
+                'last_sign_in_at': response.user.last_sign_in_at
+            }
+            return {"success": True, "message": "Login successful", "redirect": '/dashboard'}
+        except AuthApiError as e:
+            return {"success": False, "message": str(e)}, 400
 
-@bp_user.route('/api/users')
-def api_user():
+    return render_template('auth/signin.html')
 
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', PER_PAGE, type=int)  # Set a default or use a config variable
+@bp_user.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        data = request.get_json()
+        try:
+            response = supabase.client.auth.sign_up(
+                credentials={
+                    "email": data.get('email'),
+                    "password": data.get('password'),
+                    "options": {"data": {"username": data.get('username')}}
+                }
+            )
+            return {
+                "success": True,
+                "message": "Please check your email to verify your account.",
+                "redirect": url_for('users.signin')
+            }
+        except AuthApiError as e:
+            return {"success": False, "message": str(e)}, 400
 
-    # Use Flask-SQLAlchemy's paginate method on the query
-    query = db.session.query(User)
-    pagination = db.paginate(query, page=page, per_page=per_page, count=True)
+    return render_template('auth/signup.html')
 
-    items = [user.to_dict() for user in pagination.items]  # Assuming a to_dict method on your User model
+@bp_user.route('/signout', methods=['GET', 'POST'])
+def signout():
+    if request.method == 'POST':
+        supabase.client.auth.sign_out()
+        session.clear()
+        return redirect(url_for('users.signin'))
+    return render_template('auth/signout.html')
 
-    # Construct the response dictionary
-    response_data = {
-        'items': items,
-        'perPage': pagination.per_page,
-        'page': pagination.page,
-        'total': pagination.total,
-        'pages': pagination.pages,
-        'has_prev': pagination.has_prev,
-        'has_next': pagination.has_next,
-        'prev_num': pagination.prev_num,
-        'next_num': pagination.next_num
-    }
+@bp_user.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        data = request.get_json()
+        try:
+            supabase.client.auth.reset_password_for_email(email=data.get('email'))
+            return {
+                "success": True,
+                "message": "Please check your email for a password reset link.",
+                "redirect": url_for('users.signin')
+            }
+        except AuthApiError as e:
+            return {"success": False, "message": str(e)}, 400
 
-    return Response(json.dumps(response_data), content_type='application/json')
+    return render_template('auth/forgot-password.html')
 
+@bp_user.route('/callback')
+def callback():
+    code = request.args.get('code')
+    next = request.args.get('next', 'dashboard')
 
-@bp_user.post('/api/user/')
-def api_user_create():
-    user_data = request.json.get('item', {})
-    user = User()
-    user.from_dict(user_data)  # Assuming from_dict is correctly implemented
-    user.confirmed_at = datetime.datetime.now()
-    db.session.add(user)
-    try:
-        db.session.commit()
-        return {'message': 'User successfully created!'}
-    except Exception as e:
-        db.session.rollback()
-        return {
-            'message': 'Error creating user',
-            'error': str(e)
-            }, 412
+    if code:
+        try:
+            res = supabase.client.auth.exchange_code_for_session({"auth_code": code})
+            session["access_token"] = res.session.access_token
+            session["user"] = {
+                'id': res.user.id,
+                'email': res.user.email,
+                'role': res.user.role,
+                'last_sign_in_at': res.user.last_sign_in_at
+            }
+            return redirect(url_for(next))
+        except AuthApiError as e:
+            return {"success": False, "message": str(e)}, 400
 
+    return redirect(url_for('users.signin'))
 
-@bp_user.post('/api/user/<int:id>')
-def api_user_update(id):
-    user = db.get_or_404(User, id)
-    user_data = request.json.get('item', {})
-    user.from_dict(user_data)
-    db.session.commit()
-    return {'message': 'User successfully updated!'}
-
-
-@bp_user.route('/api/user/<int:id>', methods=['DELETE'])
-def api_user_delete(id):
-    user = db.get_or_404(User, id)
-    db.session.delete(user)
-    db.session.commit()
-    return {'message': 'User successfully deleted!'}
-
-
-
-
-@bp_user.route('/roles/')
-def roles():
-    return render_template('cms/roles.html')
-
-
-@bp_user.route('/api/roles', methods=['GET'])
-def api_roles():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', PER_PAGE, type=int)
-
-    query = db.session.query(Role)
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-
-    items = [role.to_dict() for role in pagination.items]
-
-    response_data = {
-        'items': items,
-        'perPage': pagination.per_page,
-        'page': pagination.page,
-        'total': pagination.total,
-        'pages': pagination.pages,
-        'has_prev': pagination.has_prev,
-        'has_next': pagination.has_next,
-        'prev_num': pagination.prev_num,
-        'next_num': pagination.next_num
-    }
-
-    return Response(json.dumps(response_data), content_type='application/json')
-
-
-@bp_user.route('/api/role/', methods=['POST'])
-def api_role_create():
-    role_data = request.json.get('item', {})
-    role = Role()
-    role.from_dict(role_data)
-    db.session.add(role)
-    try:
-        db.session.commit()
-        return {'message': 'Role successfully created!'}
-    except Exception as e:
-        db.session.rollback()
-        return {'message': 'Error creating role', 'error': str(e)}, 412
-
-
-@bp_user.post('/api/role/<int:id>')
-def api_role_update(id):
-    role = db.get_or_404(Role, id)
-    role_data = request.json.get('item', {})
-    role.from_dict(role_data)
-    db.session.commit()
-    return {'message': 'Role successfully updated!'}
-
-
-@bp_user.route('/api/role/<int:id>', methods=['DELETE'])
-def api_role_delete(id):
-    role = db.session.query(Role).get_or_404(id)
-    db.session.delete(role)
-    db.session.commit()
-    return {'message': 'Role successfully deleted!'}
+@bp_user.route('/dashboard')
+@login_required
+def dashboard():
+    user = session.get('user')
+    if user is None:
+        return {"success": False, "message": "Not authenticated"}, 401
+    return render_template('user/dashboard.html', user=user)

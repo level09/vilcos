@@ -28,3 +28,8 @@ babel = Babel()
 
 from flask_openai import OpenAI
 openai = OpenAI()
+
+
+from flask_supabase import Supabase
+supabase = Supabase()
+

@@ -41,3 +41,6 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+
+    SUPABASE_URL = os.environ.get('SUPABASE_URL')
+    SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
