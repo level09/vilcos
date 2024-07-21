@@ -4,13 +4,12 @@ import inspect
 import click
 from flask import Flask, render_template
 
-import enferno.commands as commands
-from enferno.extensions import cache, db, mail, debug_toolbar, session, babel, openai , supabase
-from enferno.portal.views import portal
-from enferno.public.views import public
-from enferno.settings import Config
-from enferno.user.models import User, Role
-from enferno.user.views import bp_user
+import vilcos.commands as commands
+from vilcos.extensions import cache, db, mail, debug_toolbar, session, babel, openai , supabase
+from vilcos.portal.views import portal
+from vilcos.public.views import public
+from vilcos.settings import Config
+from vilcos.user.views import bp_user
 
 
 def create_app(config_object=Config):
@@ -65,8 +64,6 @@ def register_shellcontext(app):
         """Shell context objects."""
         return {
             'db': db,
-            'User': User,
-            'Role': Role
         }
 
     app.shell_context_processor(shell_context)

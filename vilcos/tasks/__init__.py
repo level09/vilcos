@@ -2,7 +2,7 @@
 
 from celery import Celery
 
-from enferno.settings import Config as cfg
+from vilcos.settings import Config as cfg
 
 celery = Celery('tasks', broker=cfg.CELERY_BROKER_URL, backend=cfg.CELERY_RESULT_BACKEND,
                 broker_connection_retry_on_startup=True)
@@ -14,7 +14,7 @@ class ContextTask(celery.Task):
     abstract = True
 
     def __call__(self, *args, **kwargs):
-        from enferno.app import create_app
+        from vilcos.app import create_app
         with create_app(cfg).app_context():
             return super(ContextTask, self).__call__(*args, **kwargs)
 

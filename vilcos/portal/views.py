@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask.templating import render_template
-from enferno.user.views import login_required
+from vilcos.user.views import login_required
 portal = Blueprint('portal', __name__, static_folder='../static')
 
 

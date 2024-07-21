@@ -2,10 +2,6 @@ from flask import request, Blueprint, send_from_directory
 from flask.templating import render_template
 
 public = Blueprint('public',__name__, static_folder='../static')
-@public.after_request
-def add_header(response):
-    response.headers['Cache-Control'] = 'public, max-age=10800'
-    return response
 
 @public.route('/')
 def index():

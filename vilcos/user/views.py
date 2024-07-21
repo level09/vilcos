@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import Blueprint, render_template, redirect, request, session, url_for
-from enferno.extensions import supabase
+from vilcos.extensions import supabase
 from gotrue.errors import AuthApiError
 
 bp_user = Blueprint('users', __name__, url_prefix='/auth', static_folder='../static')

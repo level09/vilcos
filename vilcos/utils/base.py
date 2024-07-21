@@ -1,4 +1,4 @@
-from enferno.extensions import db
+from vilcos.extensions import db
 from sqlalchemy import exc
 
 class BaseMixin():

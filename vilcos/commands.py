@@ -6,8 +6,7 @@ import click
 from flask.cli import with_appcontext, AppGroup
 from rich.console import Console
 
-from enferno.extensions import db, openai
-from enferno.user.models import User
+from vilcos.extensions import db, openai
 from rich.progress import Progress, SpinnerColumn
 
 console = Console()
@@ -22,45 +21,10 @@ def create_db():
     print('Database structure created successfully')
 
 
-@click.command()
-@with_appcontext
-def install():
-    """Install a default admin user and add an admin role to it.
-    """
-
-    pass
 
 
 
 
-
-@click.command()
-@click.option('-e', '--email', prompt=True, default=None)
-@click.option('-r', '--role', prompt=True, default='admin')
-@with_appcontext
-def add_role(email, role):
-    """Adds a role to the specified user.
-        """
-    from enferno.user.models import Role
-    u = User.query.filter(User.email == email).first()
-
-    if u is None:
-        print('Sorry, this user does not exist!')
-    else:
-        r = db.session.execute(db.select(Role).filter_by(name=role)).scalar_one()
-        if r is None:
-            print('Sorry, this role does not exist!')
-            u = click.prompt('Would you like to create one? Y/N', default='N')
-            if u.lower() == 'y':
-                r = Role(name=role)
-                try:
-                    db.session.add(r)
-                    db.session.commit()
-                    print('Role created successfully, you may add it now to the user')
-                except Exception as e:
-                    db.session.rollback()
-        # add role to user
-        u.roles.append(r)
 
 
 
