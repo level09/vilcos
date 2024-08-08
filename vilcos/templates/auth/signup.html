@@ -89,7 +89,7 @@ const app = createApp({
             const form = this.$refs.form;
             if (form.validate()) {
                 try {
-                    const response = await axios.post('/signup', this.formData);
+                    const response = await axios.post('/auth/signup', this.formData);
                     if (response.data.success) {
                         this.showSnack('Account created successfully!');
                         // Redirect to the dashboard or the specified route
