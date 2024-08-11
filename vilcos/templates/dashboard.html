@@ -10,7 +10,7 @@
 
         </v-card-text>
         <v-card-text>
-            <div class="text-h5 mb-3">Welcome, </div>
+            <div class="text-h5 mb-3">Welcome, {{ session.user.email }} </div>
         </v-card-text>
         <v-card-actions class="justify-start">
             <v-btn variant="elevated" color="red" href="/auth/signout" color="primary">Logout</v-btn>

@@ -1,9 +1,21 @@
+from datetime import datetime
 from functools import wraps
-from flask import Blueprint, render_template, redirect, request, session, url_for
+from flask import Blueprint, render_template, redirect, request, session, url_for, current_app
 from vilcos.extensions import supabase
 from gotrue.errors import AuthApiError
 
 bp_user = Blueprint('users', __name__, url_prefix='/auth', static_folder='../static')
+
+def set_user_session(session_data):
+    session['access_token'] = session_data['access_token']
+    session['refresh_token'] = session_data['refresh_token']
+    session['expires_at'] = session_data.get('expires_at')
+    session['user'] = {
+        'id': session_data['user'].id,
+        'email': session_data['user'].email,
+        'role': session_data['user'].role,
+        'last_sign_in_at': session_data['user'].last_sign_in_at
+    }
 
 def login_required(f):
     @wraps(f)
@@ -39,13 +51,12 @@ def signin():
             response = supabase.client.auth.sign_in_with_password(
                 credentials={"email": data.get('email'), "password": data.get('password')}
             )
-            session['access_token'] = response.session.access_token
-            session['user'] = {
-                'id': response.user.id,
-                'email': response.user.email,
-                'role': response.user.role,
-                'last_sign_in_at': response.user.last_sign_in_at
-            }
+            set_user_session({
+                'access_token': response.session.access_token,
+                'refresh_token': response.session.refresh_token,
+                'expires_at': response.session.expires_at,
+                'user': response.user
+            })
             return {"success": True, "message": "Login successful", "redirect": '/dashboard'}
         except AuthApiError as e:
             return {"success": False, "message": str(e)}, 400
@@ -98,26 +109,44 @@ def forgot_password():
 
     return render_template('auth/forgot-password.html')
 
-@bp_user.route('/callback')
+@bp_user.route("/signin/github")
+def signin_with_github():
+    resp = supabase.client.auth.sign_in_with_oauth(
+        {
+            "provider": "github",
+            "options": {"redirect_to": 'http://127.0.0.1:5000/auth/callback'},
+        }
+    )
+    return redirect(resp.url)
+
+@bp_user.route("/callback")
 def callback():
-    code = request.args.get('code')
-    next = request.args.get('next', 'dashboard')
+    return render_template('auth/callback.html')
 
-    if code:
-        try:
-            res = supabase.client.auth.exchange_code_for_session({"auth_code": code})
-            session["access_token"] = res.session.access_token
-            session["user"] = {
-                'id': res.user.id,
-                'email': res.user.email,
-                'role': res.user.role,
-                'last_sign_in_at': res.user.last_sign_in_at
-            }
-            return redirect(url_for(next))
-        except AuthApiError as e:
-            return {"success": False, "message": str(e)}, 400
 
-    return redirect(url_for('users.signin'))
+@bp_user.post('/process-tokens')
+def process_tokens():
+    data = request.json
+    access_token = data.get('access_token')
+    refresh_token = data.get('refresh_token')
+
+    if access_token and refresh_token:
+        # Fetch the user information using the access token
+        user_info = supabase.client.auth.get_user(access_token)
+
+        if user_info.user is None:  # Check if user_info.user exists
+            return {"success": False, "message": "Failed to retrieve user info"}, 400
+
+        set_user_session({
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'user': user_info.user
+        })
+
+        return {"success": True, "redirect": "/dashboard"}
+
+    return {"success": False, "message": "Missing token data"}, 400
+
 
 @bp_user.route('/dashboard')
 @login_required
