@@ -114,7 +114,7 @@ def signin_with_github():
     resp = supabase.client.auth.sign_in_with_oauth(
         {
             "provider": "github",
-            "options": {"redirect_to": 'http://127.0.0.1:5000/auth/callback'},
+            "options": {"redirect_to": f"{request.url_root}auth/callback"}
         }
     )
     return redirect(resp.url)
