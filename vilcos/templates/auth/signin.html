@@ -9,14 +9,17 @@
         </v-toolbar>
         <v-card-text>
             <div class="mt-4">
-    <v-btn icon="mdi-github" variant="link" href="/auth/signin/github" class="btn btn-secondary">
+    <v-btn prepend-icon="mdi-github" variant="tonal"  href="/auth/signin/github" class="btn w-100">
 
-
+        Sign in with Github
     </v-btn>
+
 </div>
 
 
+
         </v-card-text>
+        <v-divider class="my-5 mx-5"></v-divider>
         <v-card-text>
             <v-text-field
                 v-model="formData.email"
