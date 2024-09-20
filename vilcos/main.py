@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from vilcos.config import Settings
 from vilcos.routes import auth
+import uvicorn
 
 app = FastAPI()
 
@@ -24,5 +25,4 @@ async def root():
     return {"message": "Welcome to the FastAPI Supabase Template"}
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
