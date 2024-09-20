@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+jinja2
+sqlalchemy
+pydantic-settings
+supabase
+python-dotenv
+supabase
+
