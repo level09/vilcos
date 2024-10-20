@@ -6,4 +6,5 @@ pydantic-settings
 supabase
 python-dotenv
 supabase
-
+starlette-session
+aioredis
