@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,23 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.3.5/dist/vuetify.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', path='css/main.css') }}" rel="stylesheet">
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
+
 <body>
     <div id="app">
-        {% block content %}{% endblock %}
+        <v-layout>
+            <v-main class="d-flex align-center justify-center" style="min-height: 300px;">
+
+                {% block content %}{% endblock %}
+
+                <v-snackbar v-model="snackBar" :timeout="3000">
+                    ${ snackMessage }
+                </v-snackbar>
+
+            </v-main>
+        </v-layout>
     </div>
 
     <!-- Vue 3 -->
@@ -20,6 +34,34 @@
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.3.5/dist/vuetify.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', path='js/main.js') }}"></script>
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    <script>
+        //base generic vue initialization script
+        const { createApp } = Vue;
+        const { createVuetify } = Vuetify;
+        const vuetify = createVuetify();
+
+        const app = createApp({
+            data() {
+                return {
+                    drawer: false,
+                    snackBar: false,
+
+                    menu: null,
+
+                };
+            },
+            methods: {
+                // Add your methods here
+            },
+            delimiters: ['${', '}']
+        });
+
+        app.use(vuetify).mount('#app');
+
+    </script>
+
+    {% endblock %}
 </body>
+
 </html>

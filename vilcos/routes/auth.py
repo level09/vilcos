@@ -1,14 +1,41 @@
 # app/routes/auth.py
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from supabase import create_client, Client
 from vilcos.config import Settings
+from gotrue.errors import AuthApiError
 
 router = APIRouter()
 settings = Settings()
 supabase: Client = create_client(settings.supabase_url, settings.supabase_key)
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="vilcos/templates")
+
+@router.get("/signin")
+async def signin_page(request: Request):
+    return templates.TemplateResponse("auth/signin.html", {"request": request})
+
+@router.get("/signup")
+async def signup_page(request: Request):
+    return templates.TemplateResponse("auth/signup.html", {"request": request})
+
+@router.get("/signout")
+async def signout_page(request: Request):
+    return templates.TemplateResponse("auth/signout.html", {"request": request})
+
+@router.get("/forgot-password")
+async def forgot_password_page(request: Request):
+    return templates.TemplateResponse("auth/forgot-password.html", {"request": request})
+
+@router.get("/signin/github")
+async def signin_with_github(request: Request):
+    resp = supabase.auth.sign_in_with_oauth(
+        {
+            "provider": "github",
+            "options": {"redirect_to": f"{request.url_for('callback')}"}
+        }
+    )
+    return RedirectResponse(url=resp.url)
 
 @router.post("/signin")
 async def signin(request: Request):
@@ -33,6 +60,7 @@ async def signin(request: Request):
 
 @router.post("/signup")
 async def signup(request: Request):
+    
     data = await request.json()
     try:
         response = supabase.auth.sign_up(
@@ -42,6 +70,7 @@ async def signup(request: Request):
                 "options": {"data": {"username": data.get('username')}}
             }
         )
+        
         return JSONResponse(content={
             "success": True,
             "message": "Please check your email to verify your account."
