@@ -9,8 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.3.5/dist/vuetify.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', path='css/main.css') }}" rel="stylesheet">
-    <!-- Axios -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
 </head>
 
 <body>
@@ -32,6 +31,10 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.36/dist/vue.global.prod.js"></script>
     <!-- Vuetify 3 -->
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.3.5/dist/vuetify.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Corrected Reconnecting WebSocket URL -->
+    <script src="https://cdn.jsdelivr.net/npm/reconnecting-websocket@4.4.0/dist/reconnecting-websocket-iife.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', path='js/main.js') }}"></script>
     {% block scripts %}

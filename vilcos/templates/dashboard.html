@@ -9,3 +9,25 @@
 </v-card>
 
 {% endblock %}
+{% block scripts %}
+
+<script>
+    const socket = new ReconnectingWebSocket('ws://localhost:8000/live/ws');
+
+    socket.onopen = function(event) {
+        console.log('WebSocket is open now.');
+    };
+
+    socket.onmessage = function(event) {
+        console.log('Received:', event.data);
+    };
+
+    socket.onclose = function(event) {
+        console.log('WebSocket is closed now.');
+    };
+
+    socket.onerror = function(error) {
+        console.error('WebSocket error observed:', error);
+    };
+</script>
+{% endblock %}
