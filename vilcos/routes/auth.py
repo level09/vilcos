@@ -69,14 +69,16 @@ async def signin(request: Request):
 
 @router.post("/signup")
 async def signup(request: Request):
-
     data = await request.json()
     try:
         response = supabase.auth.sign_up(
             credentials={
                 "email": data.get("email"),
                 "password": data.get("password"),
-                "options": {"data": {"username": data.get("username")}},
+                "options": {
+                    "data": {"username": data.get("username")},
+                    "email_redirect_to": f"{request.url_for('signin_page')}",  # Redirect to the signin page
+                },
             }
         )
 
@@ -143,4 +145,4 @@ async def process_tokens(request: Request):
     )
 
 
-# Add more auth routes as needed (forgot password, OAuth, etc.)
+
