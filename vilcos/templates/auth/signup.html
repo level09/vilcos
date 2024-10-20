@@ -100,9 +100,7 @@ const app = createApp({
                         this.showSnack('Error creating account: ' + response.data.detail);
                     }
                 } catch (error) {
-                    console.log(error);
                     const errorMessage = error.response?.data?.detail || 'An unknown error occurred';
-                    alert(errorMessage);
                     this.showSnack('Error: ' + errorMessage);
                 }
             }
