@@ -5,6 +5,8 @@ from fastapi.templating import Jinja2Templates
 from supabase import create_client, Client
 from vilcos.config import Settings
 from gotrue.errors import AuthApiError
+from datetime import datetime
+from vilcos.dependencies import login_required
 
 router = APIRouter()
 settings = Settings()
@@ -50,22 +52,30 @@ async def signin(request: Request):
         response = supabase.auth.sign_in_with_password(
             credentials={"email": data.get("email"), "password": data.get("password")}
         )
-        return JSONResponse(
-            content={
-                "access_token": response.session.access_token,
-                "refresh_token": response.session.refresh_token,
-                "expires_at": response.session.expires_at,
-                "user": {
-                    "id": response.user.id,
-                    "email": response.user.email,
-                    "role": response.user.role,
-                    "last_sign_in_at": response.user.last_sign_in_at,
-                },
+        
+        # Convert the expiration timestamp to a datetime object and then to ISO 8601 string
+        expires_at = datetime.fromtimestamp(response.session.expires_at).isoformat() if response.session.expires_at else None
+        
+        # Set user session using Starlette's session middleware
+        request.session['user'] = {
+            'access_token': response.session.access_token,
+            'refresh_token': response.session.refresh_token,
+            'expires_at': expires_at,  # Store as ISO 8601 string
+            'user': {
+                'id': response.user.id,
+                'email': response.user.email,
+                'role': response.user.role,
+                'last_sign_in_at': response.user.last_sign_in_at.isoformat() if response.user.last_sign_in_at else None,
             }
+        }
+        return JSONResponse(
+            content={"success": True, "message": "Login successful", "redirect": "/dashboard"}
         )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
+    except AuthApiError as e:
+        return JSONResponse(
+            content={"success": False, "message": str(e)},
+            status_code=400
+        )
 
 @router.post("/signup")
 async def signup(request: Request):
@@ -143,6 +153,12 @@ async def process_tokens(request: Request):
     return JSONResponse(
         content={"success": False, "message": "Missing token data"}, status_code=400
     )
+
+@router.get("/protected")
+async def protected_route(user: dict = Depends(login_required)):
+    return {"message": "This is a protected route", "user": user}
+
+
 
 
 
