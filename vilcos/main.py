@@ -8,6 +8,7 @@ import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
 import redis.asyncio as aioredis
 import uuid
+from vilcos.database import create_tables
 
 app = FastAPI()
 
@@ -26,6 +27,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Initialize templates
 templates = Jinja2Templates(directory="vilcos/templates")
 
+# Create tables on startup
+@app.on_event("startup")
+async def startup_event():
+    create_tables()
+
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
@@ -39,6 +45,10 @@ async def root():
 @app.get("/dashboard")
 async def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@app.get("/booking")
+async def numbered_cards(request: Request):
+    return templates.TemplateResponse("booking.html", {"request": request})
 
 
 if __name__ == "__main__":

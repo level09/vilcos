@@ -10,8 +10,26 @@
 
 {% endblock %}
 {% block scripts %}
-
 <script>
+    const { createApp } = Vue;
+    const { createVuetify } = Vuetify;
+    const vuetify = createVuetify();
+
+    const app = createApp({
+        data() {
+            return {
+                // You can add any reactive data here if needed
+            };
+        },
+        methods: {
+            // You can add any methods here if needed
+        },
+        delimiters: ['${', '}']
+    });
+
+    app.use(vuetify).mount('#app');
+
+    // Existing WebSocket code
     const socket = new ReconnectingWebSocket('ws://localhost:8000/live/ws');
 
     socket.onopen = function(event) {

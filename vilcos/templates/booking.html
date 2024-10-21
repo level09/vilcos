@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Numbered Cards{% endblock %}
+
+{% block content %}
+<v-container>
+    <v-row>
+        <v-col v-for="n in 9" :key="n" cols="12" sm="6" md="4">
+            <v-card class="mx-auto" max-width="300">
+                <v-card-title class="text-h5 text-center">
+                    Table ${n}
+                </v-card-title>
+                <v-card-text class="text-center">
+                    This is restaurant table number ${n}.
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn color="primary" block>
+                        Book Table ${n}
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-col>
+    </v-row>
+</v-container>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const { createApp } = Vue;
+    const { createVuetify } = Vuetify;
+    const vuetify = createVuetify();
+
+    const app = createApp({
+        data() {
+            return {
+                // You can add any reactive data here if needed
+            };
+        },
+        methods: {
+            // You can add any methods here if needed
+        },
+        delimiters: ['${', '}']
+    });
+
+    app.use(vuetify).mount('#app');
+</script>
+{% endblock %}
