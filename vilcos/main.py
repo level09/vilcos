@@ -1,16 +1,18 @@
-# app/main.py
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from vilcos.config import Settings
-from vilcos.routes import auth, websockets  # Import the new WebSocket routes
-import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
+import uvicorn
 import redis.asyncio as aioredis
-import uuid
-from vilcos.database import create_tables
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
-app = FastAPI()
+from vilcos.models import Table
+from vilcos.database import get_db, manage_db
+from vilcos.config import Settings
+from vilcos.routes import auth, websockets
+
+app = FastAPI(lifespan=manage_db)
 
 # Load settings
 settings = Settings()
@@ -21,21 +23,12 @@ redis = aioredis.from_url(settings.redis_url)
 # Add session middleware
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
-# Mount static files
+# Mount static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Initialize templates
 templates = Jinja2Templates(directory="vilcos/templates")
-
-# Create tables on startup
-@app.on_event("startup")
-async def startup_event():
-    create_tables()
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-
-# Include WebSocket routers
 app.include_router(websockets.router, prefix="/live", tags=["websockets"])
 
 @app.get("/")
@@ -46,10 +39,14 @@ async def root():
 async def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
-@app.get("/booking")
-async def numbered_cards(request: Request):
-    return templates.TemplateResponse("booking.html", {"request": request})
+async def get_tables(session: AsyncSession) -> list:
+    result = await session.execute(select(Table))
+    return result.scalars().all()
 
+@app.get("/booking")
+async def booking_page(request: Request, session: AsyncSession = Depends(get_db)):
+    tables = await get_tables(session)
+    return templates.TemplateResponse("booking.html", {"request": request, "tables": tables})
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

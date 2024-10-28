@@ -1,26 +1,62 @@
-# vilcos/database.py
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+import logging
+from contextlib import asynccontextmanager
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
 from vilcos.config import settings
-from vilcos.models import Table  # Import models at the top
 
-# Use asyncpg for async database connection
-SQLALCHEMY_DATABASE_URL = settings.database_url.replace('postgresql://', 'postgresql+asyncpg://')
+logger = logging.getLogger(__name__)
 
-# Create an async engine and session
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True, future=True)
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-# Base class for declarative models
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
-# Dependency for getting a database session
+
+DATABASE_URL = settings.database_url.replace(
+    'postgresql://', 'postgresql+asyncpg://'
+) if 'postgresql://' in settings.database_url else settings.database_url
+
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=settings.debug,
+    pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=10,
+    connect_args={"statement_cache_size": 0}  # Ensure this is set to disable prepared statements cache
+)
+
+AsyncSessionMaker = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
+
+
 async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session
+    async with AsyncSessionMaker() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
-# Function to create tables
+
+@asynccontextmanager
+async def manage_db(app):
+    async with engine.begin() as conn:
+        try:
+            if settings.debug:
+                # Drop all tables if they exist
+                await conn.run_sync(Base.metadata.drop_all)
+            # Create all tables
+            await conn.run_sync(Base.metadata.create_all)
+        except Exception as e:
+            logger.error(f"Error managing database schema: {e}")
+            raise
+    yield
+    await engine.dispose()
+
+
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

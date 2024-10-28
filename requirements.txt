@@ -5,6 +5,9 @@ sqlalchemy
 pydantic-settings
 supabase
 python-dotenv
-supabase
 starlette-session
 aioredis
+greenlet
+asyncpg
+typer
+IPython

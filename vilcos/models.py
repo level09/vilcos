@@ -3,12 +3,14 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from vilcos.database import Base
 
+
 class BaseModel(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     is_active = Column(Boolean, default=True)
+
 
 class Table(BaseModel):
     __tablename__ = "tables"
@@ -18,6 +20,7 @@ class Table(BaseModel):
     location = Column(String)  # e.g., 'window', 'bar', 'patio'
     reservations = relationship("Reservation", back_populates="table")
 
+
 class TimeSlot(BaseModel):
     __tablename__ = "time_slots"
 
@@ -25,6 +28,7 @@ class TimeSlot(BaseModel):
     end_time = Column(Time)
     is_lunch = Column(Boolean)
     is_dinner = Column(Boolean)
+
 
 class Reservation(BaseModel):
     __tablename__ = "reservations"
@@ -38,7 +42,6 @@ class Reservation(BaseModel):
     customer_email = Column(String)
     customer_phone = Column(String)
     special_requests = Column(String)
-    
+
     table = relationship("Table", back_populates="reservations")
     time_slot = relationship("TimeSlot")
-
