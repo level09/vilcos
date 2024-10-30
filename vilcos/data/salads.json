@@ -1,0 +1,23 @@
+{
+  "name": "Salads",
+  "description": "Fresh and crispy salads.",
+  "items": [
+    {
+      "item_number": 50,
+      "name": "CRISPY CHICKEN SALAD",
+      "name_korean": "크리스피 치킨 샐러드",
+      "description": "deep fried chicken with sweet chilli sauce on a mixed salad with rice",
+      "dietary_info": "A / C / F / K",
+      "price": "14,50"
+    },
+    {
+      "item_number": 51,
+      "name": "CRISPY TOFU SALAD",
+      "name_korean": "크리스피 두부 샐러드",
+      "description": "deep fried tofu with sweet chilli sauce on a mixed salad with rice",
+      "dietary_info": "VEGAN A / F / K",
+      "price": "14,50"
+    }
+  ]
+}
+

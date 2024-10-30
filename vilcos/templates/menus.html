@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Menus Dashboard
+{% endblock %}
+
+{% block content %}
+<v-card>
+    <v-container>
+        <v-data-table-server
+            :headers="headers"
+            :items="menus"
+            :items-length="totalItems"
+            item-key="name"
+            class="elevation-1"
+        >
+            <template v-slot:top>
+                <v-toolbar flat>
+                    <v-toolbar-title>Menus</v-toolbar-title>
+                    <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" @click="addMenu">Add Menu</v-btn>
+                </v-toolbar>
+            </template>
+        </v-data-table-server>
+    </v-container>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const { createApp } = Vue;
+    const { createVuetify } = Vuetify;
+    const vuetify = createVuetify();
+
+    const app = createApp({
+        data() {
+            return {
+                headers: [
+                    { title: 'Number', value: 'item_number' },
+                    { title: 'Name', value: 'name' },
+                    { title: '(Korean)', value: 'name_korean' },
+                    { title: 'Description', value: 'description' },
+                    { title: 'Dietary Info', value: 'dietary_info' },
+                    { title: 'Price', value: 'price' },
+                    { title: 'Actions', value: 'actions', sortable: false },
+                ],
+                menus: [],
+                totalItems: 1000,
+                snackBar: false,
+            };
+        },
+        async mounted() {
+            try {
+                const response = await fetch('/api/menu-items');
+                const data = await response.json();
+                this.menus = data.menu_items;
+            } catch (error) {
+                console.error('Error fetching menu items:', error);
+            }
+        },
+        methods: {
+            addMenu() {
+                // Logic to add a new menu
+            },
+        },
+    });
+
+    app.use(vuetify).mount('#app');
+</script>
+{% endblock %}

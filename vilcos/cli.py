@@ -3,12 +3,15 @@ import typer
 import asyncio
 import sys
 from pathlib import Path
+import json
+from glob import glob
+import re
 
 # Add the parent directory to sys.path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from vilcos.database import create_tables, get_db, manage_db
-from vilcos.models import Table, TimeSlot, Reservation
+from vilcos.models import DiningTable, TimeSlot, Reservation, Item
 from sqlalchemy import select, create_engine
 from sqlalchemy.orm import sessionmaker
 from vilcos.config import settings  # Ensure this import is correct based on your project structure
@@ -33,19 +36,76 @@ def setup_initial_data():
 
     async def _create_data():
         async for session in get_db():
-            result = await session.execute(select(Table))
-            existing_data = result.scalars().all()
+            # Check for existing tables
+            result = await session.execute(select(DiningTable))
+            existing_tables = result.scalars().all()
 
-            if not existing_data:
+            if not existing_tables:
                 for i in range(1, 21):
-                    new_item = Table(
+                    new_table = DiningTable(
                         table_number=i,
                         capacity=4,
                         location="Main Area"
                     )
-                    session.add(new_item)
+                    session.add(new_table)
 
-                await session.commit()
+            # Check for existing time slots
+            result = await session.execute(select(TimeSlot))
+            existing_time_slots = result.scalars().all()
+
+            if not existing_time_slots:
+                durations = [15, 30, 45, 60]  # Preset durations in minutes
+                
+                for duration in durations:
+                    new_slot = TimeSlot(duration=duration)
+                    session.add(new_slot)
+
+            # Load items from all JSON files in the directory
+            json_files = glob('vilcos/data/*.json')
+            all_items = []
+
+            # Fetch existing item numbers to avoid duplicates
+            result = await session.execute(select(Item.item_number))
+            existing_item_numbers = set(result.scalars().all())
+            next_item_number = max(existing_item_numbers, default=0) + 1
+
+            for file_path in json_files:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for item in data['items']:
+                        # Clean and convert price
+                        price_str = item['price'].replace(',', '.').strip()
+                        match = re.match(r"^\d+(\.\d+)?$", price_str)
+                        if match:
+                            price = float(match.group())
+                        else:
+                            typer.echo(f"Invalid price format for item {item['name']}: {price_str}")
+                            continue
+
+                        # Assign a unique item number
+                        while next_item_number in existing_item_numbers:
+                            next_item_number += 1
+
+                        new_item = Item(
+                            item_number=next_item_number,
+                            name=item['name'],
+                            name_korean=item.get('name_korean', ''),
+                            description=item.get('description', ''),
+                            dietary_info=item.get('dietary_info', ''),
+                            price=price
+                        )
+                        all_items.append(new_item)
+                        existing_item_numbers.add(next_item_number)
+
+            # Check for existing items
+            result = await session.execute(select(Item))
+            existing_items = result.scalars().all()
+
+            if not existing_items:
+                session.add_all(all_items)
+
+            await session.commit()
+            if not existing_tables or not existing_time_slots or not existing_items:
                 typer.echo("Initial restaurant data created.")
             else:
                 typer.echo("Initial data already exists. Skipping setup.")

@@ -1,0 +1,21 @@
+{
+  "name": "Kids Menu",
+  "description": "Delicious meals tailored for kids.",
+  "items": [
+    {
+      "name": "KIDS MENU",
+      "name_korean": "뽀로로 어린이메뉴",
+      "description": "One deep-fried vegan dumpling, one crispy-fried kim mari (glass noodles wrapped in seaweed roll), finely sliced marinated beef, roasted seaweed with rice, and an apple-spritz.",
+      "dietary_info": "A / F / K",
+      "price": "10,50"
+    },
+    {
+      "name": "KIDS MENU VEGAN",
+      "name_korean": "비건 뽀로로 어린이메뉴",
+      "description": "One deep-fried vegan dumpling, one crispy-fried kim mari (glass noodles wrapped in seaweed roll), tofu slices in a delicious soy-sesame marinade, roasted seaweed with rice, and an apple-spritz.",
+      "dietary_info": "VEGAN A / F / K",
+      "price": "10,50"
+    }
+  ]
+}
+

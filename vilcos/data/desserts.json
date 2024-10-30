@@ -1,0 +1,13 @@
+{
+  "name": "Desserts",
+  "description": "Please ask our service for our current selection of desserts.",
+  "items": [
+    {
+      "name": "MELONA",
+      "description": "Korean milky melon popsicle.",
+      "dietary_info": "P",
+      "price": "4,00"
+    }
+  ]
+}
+

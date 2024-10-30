@@ -6,14 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}FastAPI Supabase Template{% endblock %}</title>
     <!-- Vuetify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.3.5/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.7.3/dist/vuetify.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', path='css/main.css') }}" rel="stylesheet">
-    
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-cloak>
         <v-layout>
             <v-main class="d-flex align-center justify-center" style="min-height: 300px;">
 
@@ -28,9 +32,9 @@
     </div>
 
     <!-- Vue 3 -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.36/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Vuetify 3 -->
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.3.5/dist/vuetify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.7.3/dist/vuetify.min.js"></script>
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Corrected Reconnecting WebSocket URL -->
