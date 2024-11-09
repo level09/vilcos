@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<v-main>
+    <v-container>
+        <v-row justify="center">
+            <v-col cols="12" sm="8" md="6">
+                <v-card class="mt-10">
+                    <v-card-text class="text-center pa-6">
+                        <v-icon
+                            color="success"
+                            size="64"
+                            class="mb-4"
+                        >
+                            mdi-check-circle
+                        </v-icon>
+                        
+                        <h2 class="text-h4 mb-4">Payment Successful!</h2>
+                        <p class="text-subtitle-1 mb-4">
+                            Thank you for your order, {{ customer_name }}
+                        </p>
+
+                        <v-divider class="my-4"></v-divider>
+
+                        <div class="text-left">
+                            <h3 class="text-h6 mb-2">Order Details:</h3>
+                            <p>Order Type: {{ order_type }}</p>
+                            {% if table_id %}
+                            <p>Table: {{ table_id }}</p>
+                            {% endif %}
+                            <p>Amount Paid: ${{ "%.2f"|format(amount) }}</p>
+                            <p>Email: {{ customer_email }}</p>
+                        </div>
+
+                        <v-divider class="my-4"></v-divider>
+
+                        <p class="text-body-2 mb-4">
+                            A confirmation email has been sent to your email address.
+                        </p>
+                    </v-card-text>
+
+                    <v-card-actions class="justify-center pa-4">
+                        <v-btn
+                            color="primary"
+                            variant="elevated"
+                            href="/"
+                        >
+                            Return to Home
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-col>
+        </v-row>
+    </v-container>
+</v-main>
+{% endblock %} 

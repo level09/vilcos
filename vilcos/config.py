@@ -8,7 +8,9 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_key: str
     secret_key: str
-    redis_url: str  # Add this line
+    redis_url: str
+    stripe_publishable_key: str
+    stripe_secret_key: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -11,3 +11,5 @@ greenlet
 asyncpg
 typer
 IPython
+redis
+stripe

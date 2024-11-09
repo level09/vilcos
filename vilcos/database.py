@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from vilcos.config import settings
+from typing import AsyncGenerator
+from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
 
@@ -31,30 +33,22 @@ AsyncSessionMaker = async_sessionmaker(
 )
 
 
-async def get_db():
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Dependency for getting async database sessions."""
     async with AsyncSessionMaker() as session:
         try:
             yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
+        finally:
+            await session.close()
 
 
 @asynccontextmanager
-async def manage_db(app):
-    async with engine.begin() as conn:
-        try:
-            if settings.debug:
-                # Drop all tables if they exist
-                await conn.run_sync(Base.metadata.drop_all)
-            # Create all tables
-            await conn.run_sync(Base.metadata.create_all)
-        except Exception as e:
-            logger.error(f"Error managing database schema: {e}")
-            raise
-    yield
-    await engine.dispose()
+async def manage_db(app: FastAPI):
+    """Context manager for database lifecycle management."""
+    try:
+        yield
+    finally:
+        await engine.dispose()
 
 
 async def create_tables():
