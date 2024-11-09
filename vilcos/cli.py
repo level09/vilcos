@@ -14,18 +14,18 @@ from vilcos.database import create_tables, get_db, manage_db
 from vilcos.models import DiningTable, TimeSlot, Reservation, Item
 from sqlalchemy import select, create_engine
 from sqlalchemy.orm import sessionmaker
-from vilcos.config import settings  # Ensure this import is correct based on your project structure
+from vilcos.config import settings
 
 app = typer.Typer(no_args_is_help=True)
-
 
 @app.command()
 def init_db():
     """Initialize the database and create tables."""
     
     async def _init_db():
-        async with manage_db(app):
-            typer.echo("Database initialized and tables created.")
+        # Actually create the tables
+        await create_tables()
+        typer.echo("Database tables created successfully.")
 
     asyncio.run(_init_db())
 
