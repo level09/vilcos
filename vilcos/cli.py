@@ -31,7 +31,7 @@ def init_db():
 
 
 @app.command()
-def setup_initial_data():
+def import_data():
     """Create initial restaurant data if it doesn't exist."""
 
     async def _create_data():

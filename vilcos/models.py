@@ -13,12 +13,17 @@ class BaseModel(Base):
     is_active = Column(Boolean, default=True)
 
 
-class DiningTable(BaseModel):
-    __tablename__ = "tables"
+class DiningTable(Base):
+    __tablename__ = "dining_tables"
 
-    table_number = Column(Integer, unique=True, index=True)
-    capacity = Column(Integer)
-    location = Column(String)  # e.g., 'window', 'bar', 'patio'
+    id = Column(Integer, primary_key=True)
+    table_number = Column(Integer, unique=True, nullable=False)
+    capacity = Column(Integer, nullable=False)
+    location = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
+    is_reserved = Column(Boolean, default=False)
+    last_reserved_at = Column(DateTime, nullable=True)
+    
     reservations = relationship("Reservation", back_populates="table")
 
 
@@ -58,7 +63,7 @@ class Item(BaseModel):
 class Reservation(BaseModel):
     __tablename__ = "reservations"
 
-    table_id = Column(Integer, ForeignKey("tables.id"), nullable=True)  # Nullable for pickup orders
+    table_id = Column(Integer, ForeignKey("dining_tables.id"), nullable=True)
     time_slot_id = Column(Integer, ForeignKey("time_slots.id"))
     reservation_date = Column(DateTime, index=True)
     party_size = Column(Integer)

@@ -8,9 +8,11 @@ from datetime import datetime
 import stripe
 from pydantic import BaseModel
 from vilcos.config import settings
+import logging
 
 router = APIRouter()
 templates = Jinja2Templates(directory="vilcos/templates")
+logger = logging.getLogger(__name__)
 
 # Configure Stripe
 stripe.api_key = settings.stripe_secret_key
@@ -110,11 +112,24 @@ async def checkout_success(
                 status="confirmed",
                 customer_name=checkout_session.customer_details.name,
                 customer_email=checkout_session.customer_details.email,
-                # You might want to add more fields based on your needs
             )
             
             db.add(new_reservation)
+
+            # Update table status if it's a dine-in order
+            if table_id:
+                table = await db.get(DiningTable, int(table_id))
+                if table:
+                    table.is_reserved = True
+                    table.last_reserved_at = datetime.now()
+                    db.add(table)
+
             await db.commit()
+
+            # Broadcast table status update via WebSocket
+            if table_id:
+                from vilcos.routes.websockets import manager
+                await manager.broadcast(f"Table {table_id} status updated")
             
             return templates.TemplateResponse(
                 "booking/success.html",
@@ -122,14 +137,16 @@ async def checkout_success(
                     "request": request,
                     "order_type": order_type,
                     "table_id": table_id,
-                    "amount": checkout_session.amount_total / 100,  # Convert from cents
+                    "amount": checkout_session.amount_total / 100,
                     "customer_name": checkout_session.customer_details.name,
                     "customer_email": checkout_session.customer_details.email
                 }
             )
     except stripe.error.StripeError as e:
+        logger.error(f"Stripe error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Checkout success error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/booking/cancel")
