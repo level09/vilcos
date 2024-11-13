@@ -274,7 +274,7 @@
 
                             <!-- Table Information (if dine-in) -->
                             <template v-if="orderType === 'dine-in' && selectedTable">
-                                <v-list-subheader class="text-h6 text-black">Table Information</v-list-subheader>
+                                <v-list-subheader class="text-h6 mt-4 text-black">Table Information</v-list-subheader>
                                 <v-list-item>
                                     <template v-slot:prepend>
                                         <v-icon>mdi-table-furniture</v-icon>
@@ -289,10 +289,10 @@
                             </template>
 
                             <!-- Order Items -->
-                            <v-list-subheader class="text-h6 text-black">Order Items</v-list-subheader>
+                            <v-list-subheader class="text-h6 mt-4 text-black">Order Items</v-list-subheader>
                             <v-list-item v-for="item in cart" :key="item.id">
                                 <template v-slot:prepend>
-                                    <div class="text-subtitle-1">${item.quantity}x</div>
+                                    <div class="text-subtitle-1 pa-2">${item.quantity}x</div>
                                 </template>
                                 <v-list-item-title>${item.name}</v-list-item-title>
                                 <v-list-item-subtitle class="text-primary">
