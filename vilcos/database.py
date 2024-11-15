@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from vilcos.config import settings
-from typing import AsyncGenerator
+from typing import AsyncGenerator, AsyncContextManager
 from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 @asynccontextmanager
-async def manage_db(app: FastAPI):
+async def manage_db(app: FastAPI) -> AsyncContextManager[None]:
     """Context manager for database lifecycle management."""
     try:
         yield

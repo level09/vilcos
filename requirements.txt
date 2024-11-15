@@ -12,4 +12,3 @@ asyncpg
 typer
 IPython
 redis
-stripe

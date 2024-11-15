@@ -18,7 +18,7 @@ redis = aioredis.from_url(settings.redis_url)
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="vilcos/static"), name="static")
 
 # Templates
 templates = Jinja2Templates(directory="vilcos/templates")
@@ -30,8 +30,7 @@ app.include_router(api_router)
 
 @app.get("/")
 async def root():
-    # redirect to booking page
-    return RedirectResponse(url="/booking")
+    return RedirectResponse(url="/dashboard")
 
 @app.get("/dashboard")
 async def dashboard(request: Request):

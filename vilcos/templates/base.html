@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}FastAPI Supabase Template{% endblock %}</title>
+    <title>{% block title %}FastAPI Template{% endblock %}</title>
     <!-- Vuetify CSS -->
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.7.3/dist/vuetify.min.css" rel="stylesheet">
     <!-- MDI Icons -->
@@ -16,7 +16,6 @@
             display: none;
         }
     </style>
-    <script src="https://js.stripe.com/v3/"></script>
 </head>
 
 <body>
@@ -31,20 +30,14 @@
                     </template>
 
                     <v-toolbar-title class="ml-0 pl-3">
-                        Kimchi Princess
+                        FastAPI Template
                     </v-toolbar-title>
                 </v-app-bar>
 
                 <v-navigation-drawer v-model="drawer" app  width="310" expand-on-hover class="h-screen">
                     <v-list dense class="scrollable-nav d-flex flex-column" height="100%">
-                        <v-list-item prepend-icon="mdi-file-document-multiple" title="Menus" href="/menus/"
-                            key="bulletins"></v-list-item>
-
-                        <v-list-item prepend-icon="mdi-account-multiple" title="Bookings" href="/booking"
-                            key="actors"></v-list-item>
-
-                        <v-list-item prepend-icon="mdi-account-multiple" title="Vouchers" href="/vouchers"
-                            key="vouchers"></v-list-item>
+                        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" href="/dashboard"
+                            key="dashboard"></v-list-item>
                     </v-list>
                 </v-navigation-drawer>
 
@@ -67,9 +60,8 @@
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.7.3/dist/vuetify.min.js"></script>
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- Corrected Reconnecting WebSocket URL -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/reconnecting-websocket@4.4.0/dist/reconnecting-websocket-iife.min.js"></script>
+    <!-- Reconnecting WebSocket -->
+    <script src="https://cdn.jsdelivr.net/npm/reconnecting-websocket@4.4.0/dist/reconnecting-websocket-iife.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', path='js/main.js') }}"></script>
     {% block scripts %}
@@ -81,8 +73,9 @@
         const app = createApp({
             data() {
                 return {
-                    drawer: false,  // Controls navigation drawer
+                    drawer: false,
                     snackBar: false,
+                    snackMessage: '',
                     menu: null,
                 };
             },

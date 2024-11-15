@@ -1,0 +1,29 @@
+[build-system]
+requires = ["flit_core>=3.9.0"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "vilcos"
+version = "0.1.0"
+description = "A FastAPI-based web framework"
+authors = [{name = "Your Name", email = "your.email@example.com"}]
+requires-python = ">=3.8"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "jinja2",
+    "sqlalchemy",
+    "pydantic-settings",
+    "supabase",
+    "python-dotenv",
+    "starlette-session",
+    "aioredis",
+    "greenlet",
+    "asyncpg",
+    "typer",
+    "IPython",
+    "redis",
+]
+
+[project.scripts]
+vilcos = "vilcos.cli:app" 

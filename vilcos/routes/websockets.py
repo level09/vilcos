@@ -1,59 +1,112 @@
 # vilcos/routes/websockets.py
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from typing import List
-from vilcos.database import get_db
-from vilcos import models
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from typing import List, Dict, Any
+import json
+import logging
+from datetime import datetime
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class ConnectionManager:
+    """Manages WebSocket connections and message broadcasting."""
+    
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
+        self.active_connections: Dict[str, List[WebSocket]] = {}
+        
+    async def connect(self, websocket: WebSocket, channel: str = "default"):
+        """
+        Connect a WebSocket client to a specific channel.
+        
+        Args:
+            websocket: The WebSocket connection
+            channel: Channel name for grouping connections (default: "default")
+        """
         await websocket.accept()
-        self.active_connections.append(websocket)
+        if channel not in self.active_connections:
+            self.active_connections[channel] = []
+        self.active_connections[channel].append(websocket)
+        logger.info(f"Client connected to channel: {channel}")
+        
+    def disconnect(self, websocket: WebSocket, channel: str = "default"):
+        """Remove a WebSocket connection from a channel."""
+        if channel in self.active_connections:
+            self.active_connections[channel].remove(websocket)
+            if not self.active_connections[channel]:
+                del self.active_connections[channel]
+        logger.info(f"Client disconnected from channel: {channel}")
+    
+    async def broadcast(self, message: Any, channel: str = "default"):
+        """
+        Broadcast a message to all connections in a channel.
+        
+        Args:
+            message: The message to broadcast (will be JSON serialized)
+            channel: Target channel (default: "default")
+        """
+        if channel not in self.active_connections:
+            return
+            
+        message_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "data": message
+        }
+        
+        for connection in self.active_connections[channel]:
+            try:
+                await connection.send_json(message_data)
+            except Exception as e:
+                logger.error(f"Error broadcasting to client: {str(e)}")
+                await self.disconnect(connection, channel)
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
+    async def send_personal_message(self, message: Any, websocket: WebSocket):
+        """Send a message to a specific client."""
+        message_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "data": message
+        }
+        await websocket.send_json(message_data)
 
 manager = ConnectionManager()
 
-@router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+@router.websocket("/ws/{channel}")
+async def websocket_endpoint(websocket: WebSocket, channel: str = "default"):
+    """
+    WebSocket endpoint that handles connections and messages.
+    
+    Args:
+        websocket: The WebSocket connection
+        channel: Optional channel name for grouping connections
+    """
+    await manager.connect(websocket, channel)
     try:
         while True:
+            # Wait for messages from the client
             data = await websocket.receive_text()
-            await manager.broadcast(f"Table status updated: {data}")
+            try:
+                # Try to parse as JSON
+                message = json.loads(data)
+                # Echo the message back to the same channel
+                await manager.broadcast(message, channel)
+            except json.JSONDecodeError:
+                # If not JSON, broadcast as plain text
+                await manager.broadcast({"message": data}, channel)
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, channel)
+    except Exception as e:
+        logger.error(f"WebSocket error: {str(e)}")
+        manager.disconnect(websocket, channel)
 
-@router.post("/reserve")
-async def reserve_table(reservation: dict, db: Session = Depends(get_db)):
-    # Create reservation logic here
-    new_reservation = models.Reservation(**reservation)
-    db.add(new_reservation)
-    db.commit()
+# Example of how to broadcast from other parts of your application
+@router.post("/broadcast/{channel}")
+async def broadcast_to_channel(channel: str, message: Dict[str, Any]):
+    """
+    HTTP endpoint to broadcast a message to a specific channel.
     
-    # Broadcast update to all connected clients
-    await manager.broadcast("Table status updated")
-    
-    return {"message": "Reservation created successfully"}
+    Args:
+        channel: Target channel name
+        message: Message to broadcast
+    """
+    await manager.broadcast(message, channel)
+    return {"status": "Message broadcast"}
 
-@router.get("/available-tables")
-async def get_available_tables(date: str, time_slot_id: int, db: Session = Depends(get_db)):
-    # Logic to fetch available tables
-    available_tables = db.query(models.Table).filter(
-        ~models.Table.reservations.any(
-            (models.Reservation.reservation_date == date) &
-            (models.Reservation.time_slot_id == time_slot_id)
-        )
-    ).all()
-    
-    return {"available_tables": [table.table_number for table in available_tables]}
