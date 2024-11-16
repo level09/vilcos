@@ -6,7 +6,14 @@ build-backend = "flit_core.buildapi"
 name = "vilcos"
 version = "0.1.0"
 description = "A FastAPI-based web framework"
-authors = [{name = "Your Name", email = "your.email@example.com"}]
+authors = [{name = "Nidal Alhariri", email = "level09@gmail.com"}]
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 requires-python = ">=3.8"
 dependencies = [
     "fastapi>=0.100.0",
