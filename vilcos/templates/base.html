@@ -8,7 +8,7 @@
     <!-- Vuetify CSS -->
     <link href="https://cdn.jsdelivr.net/npm/vuetify@3.7.3/dist/vuetify.min.css" rel="stylesheet">
     <!-- MDI Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', path='css/main.css') }}" rel="stylesheet">
     <style>
@@ -19,39 +19,35 @@
 </head>
 
 <body>
-    <div id="app" class="justify-center full-height align-center min-vh-100 d-flex">
-        <v-app v-cloak class="h-screen">
+    <div id="app">
+        <v-app v-cloak>
             <v-layout>
-
-
                 <v-app-bar color="primary">
                     <template v-slot:prepend>
                         <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
                     </template>
-
                     <v-toolbar-title class="ml-0 pl-3">
-                        FastAPI Template
+                        Vilcos Framework
                     </v-toolbar-title>
                 </v-app-bar>
 
-                <v-navigation-drawer v-model="drawer" app  width="310" expand-on-hover class="h-screen">
-                    <v-list dense class="scrollable-nav d-flex flex-column" height="100%">
-                        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" href="/dashboard"
-                            key="dashboard"></v-list-item>
+                <v-navigation-drawer v-model="drawer" app width="310" expand-on-hover>
+                    <v-list dense>
+                        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" href="/dashboard"></v-list-item>
+                        <v-list-item prepend-icon="mdi-login" title="Sign In" href="/auth/signin"></v-list-item>
+                        <v-list-item prepend-icon="mdi-account-plus" title="Sign Up" href="/auth/signup"></v-list-item>
                     </v-list>
                 </v-navigation-drawer>
 
-
-
-
-
-                {% block content %}{% endblock %}
+                <v-main>
+                    {% block content %}{% endblock %}
+                </v-main>
 
                 <v-snackbar v-model="snackBar" :timeout="3000">
                     ${ snackMessage }
                 </v-snackbar>
-
             </v-layout>
+        </v-app>
     </div>
 
     <!-- Vue 3 -->

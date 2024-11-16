@@ -1,19 +1,116 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Welcome to Vilcos{% endblock %}
 
 {% block content %}
-<v-card>
-    <v-card-title>Welcome to the Dashboard</v-card-title>
-    <v-card-text>This is your main application dashboard.</v-card-text>
-</v-card>
+<v-container>
+    <v-row justify="center">
+        <v-col cols="12" md="8">
+            <v-card class="mb-6">
+                <v-card-title class="text-h4 font-weight-bold">
+                    Welcome to Vilcos
+                </v-card-title>
+                <v-card-subtitle class="text-subtitle-1">
+                    A modern FastAPI-based web framework with powerful features
+                </v-card-subtitle>
+                <v-card-text>
+                    <v-list>
+                        <v-list-subheader>Framework Features</v-list-subheader>
+                        
+                        <v-list-item prepend-icon="mdi-flash">
+                            <v-list-item-title>Real-time WebSockets</v-list-item-title>
+                            <v-list-item-subtitle>Built-in support for multi-channel communication</v-list-item-subtitle>
+                        </v-list-item>
 
+                        <v-list-item prepend-icon="mdi-vuejs">
+                            <v-list-item-title>Modern UI</v-list-item-title>
+                            <v-list-item-subtitle>Vue 3 + Vuetify for beautiful interfaces</v-list-item-subtitle>
+                        </v-list-item>
+
+                        <v-list-item prepend-icon="mdi-shield-lock">
+                            <v-list-item-title>Authentication Ready</v-list-item-title>
+                            <v-list-item-subtitle>Complete auth system with Supabase integration</v-list-item-subtitle>
+                        </v-list-item>
+
+                        <v-list-item prepend-icon="mdi-database">
+                            <v-list-item-title>Async Database</v-list-item-title>
+                            <v-list-item-subtitle>SQLAlchemy with connection pooling</v-list-item-subtitle>
+                        </v-list-item>
+                    </v-list>
+
+                    <v-divider class="my-4"></v-divider>
+
+                    <v-row class="mt-4">
+                        <v-col cols="12" sm="6">
+                            <v-btn
+                                block
+                                color="primary"
+                                href="/auth/signin"
+                                prepend-icon="mdi-login"
+                                variant="elevated"
+                            >
+                                Sign In
+                            </v-btn>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-btn
+                                block
+                                color="secondary"
+                                href="/auth/signup"
+                                prepend-icon="mdi-account-plus"
+                                variant="elevated"
+                            >
+                                Sign Up
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </v-card>
+
+            <v-card>
+                <v-card-title>Quick Links</v-card-title>
+                <v-card-text>
+                    <v-list>
+                        <v-list-item
+                            href="https://fastapi.tiangolo.com/"
+                            target="_blank"
+                            prepend-icon="mdi-book-open-variant"
+                        >
+                            <v-list-item-title>FastAPI Documentation</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                            href="https://vuejs.org/"
+                            target="_blank"
+                            prepend-icon="mdi-vuejs"
+                        >
+                            <v-list-item-title>Vue.js Documentation</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                            href="https://vuetifyjs.com/"
+                            target="_blank"
+                            prepend-icon="mdi-view-dashboard"
+                        >
+                            <v-list-item-title>Vuetify Documentation</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-card-text>
+            </v-card>
+        </v-col>
+    </v-row>
+</v-container>
 {% endblock %}
+
 {% block scripts %}
 <script>
     const { createApp } = Vue;
     const { createVuetify } = Vuetify;
-    const vuetify = createVuetify();
+    const vuetify = createVuetify({
+        icons: {
+            defaultSet: 'mdi',
+        },
+    });
 
     const app = createApp({
         data() {
@@ -29,8 +126,8 @@
 
     app.use(vuetify).mount('#app');
 
-    // Existing WebSocket code
-    const socket = new ReconnectingWebSocket('ws://localhost:8000/live/ws');
+    // WebSocket connection
+    const socket = new ReconnectingWebSocket('ws://' + window.location.host + '/live/ws/default');
 
     socket.onopen = function(event) {
         console.log('WebSocket is open now.');

@@ -71,15 +71,12 @@ manager = ConnectionManager()
 
 @router.websocket("/ws/{channel}")
 async def websocket_endpoint(websocket: WebSocket, channel: str = "default"):
-    """
-    WebSocket endpoint that handles connections and messages.
-    
-    Args:
-        websocket: The WebSocket connection
-        channel: Optional channel name for grouping connections
-    """
-    await manager.connect(websocket, channel)
+    """WebSocket endpoint that handles connections and messages."""
+    logger.debug(f"WebSocket connection attempt to channel: {channel}")
     try:
+        await manager.connect(websocket, channel)
+        logger.debug(f"WebSocket connected successfully to channel: {channel}")
+        
         while True:
             # Wait for messages from the client
             data = await websocket.receive_text()
@@ -92,9 +89,10 @@ async def websocket_endpoint(websocket: WebSocket, channel: str = "default"):
                 # If not JSON, broadcast as plain text
                 await manager.broadcast({"message": data}, channel)
     except WebSocketDisconnect:
+        logger.debug(f"WebSocket disconnected from channel: {channel}")
         manager.disconnect(websocket, channel)
     except Exception as e:
-        logger.error(f"WebSocket error: {str(e)}")
+        logger.error(f"WebSocket error in channel {channel}: {str(e)}")
         manager.disconnect(websocket, channel)
 
 # Example of how to broadcast from other parts of your application

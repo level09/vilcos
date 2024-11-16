@@ -8,6 +8,9 @@ from vilcos.database import manage_db
 from vilcos.routes.api import router as api_router
 from vilcos.routes import auth, websockets
 from vilcos.config import settings
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = FastAPI()
 

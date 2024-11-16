@@ -1,78 +1,42 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Authenticating{% endblock %}
 
 {% block content %}
-<v-card width="500" class="mt-10">
-    <v-card-text>
-        <h3>Processing Authentication...</h3>
-        <p>Please wait while we process your authentication.</p>
-    </v-card-text>
-</v-card>
-
-<v-snackbar v-model="snackBar" :timeout="3000" :color="snackColor">
-    ${ snackMessage }
-</v-snackbar>
+<v-container class="fill-height">
+    <v-row justify="center">
+        <v-col cols="12" sm="8" md="6" lg="4" class="text-center">
+            <v-progress-circular
+                indeterminate
+                color="primary"
+            ></v-progress-circular>
+            <div class="mt-4">
+                Please wait...
+            </div>
+        </v-col>
+    </v-row>
+</v-container>
 {% endblock %}
 
-{% block js %}
-
+{% block scripts %}
 <script>
-    const { createApp } = Vue;
-    const { createVuetify } = Vuetify;
-    const vuetify = createVuetify();
-
     const app = createApp({
-        data() {
-            return {
-                snackBar: false,
-                snackMessage: '',
-                snackColor: 'success',
-                loading: false
-            };
-        },
-        methods: {
-            showSnack(message, color = 'success') {
-                this.snackMessage = message;
-                this.snackColor = color;
-                this.snackBar = true;
-            },
-            processTokens() {
-                // Extract the fragment from the URL
-                const hash = window.location.hash.substring(1);
-                const params = new URLSearchParams(hash);
-
-                // Extract tokens and other data
-                const accessToken = params.get('access_token');
-                const refreshToken = params.get('refresh_token');
-                const expiresIn = params.get('expires_in');
-                const tokenType = params.get('token_type');
-                const providerToken = params.get('provider_token');
-                const expiresAt = params.get('expires_at');
-
-                // Send the tokens to your Flask server
-                axios.post('/auth/process-tokens', {
-                    access_token: accessToken,
-                    refresh_token: refreshToken,
-                    expires_in: expiresIn,
-                    token_type: tokenType,
-                    provider_token: providerToken,
-                    expires_at: expiresAt,
-                }).then(response => {
-                    if (response.data.success) {
-                        this.showSnack('Authentication successful');
-                        // Redirect to dashboard or specified URL
-                        window.location.href = response.data.redirect || '/dashboard';
-                    } else {
-                        this.showSnack('Authentication failed', 'error');
-                    }
-                }).catch(error => {
-                    this.showSnack(error.response?.data?.message || 'An error occurred', 'error');
-                }).finally(() => {
-                    this.loading = false;
-                });
+        mounted() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            if (code) {
+                this.processAuth(code);
             }
         },
-        mounted() {
-            this.processTokens(); // Automatically process the tokens on mount
+        methods: {
+            async processAuth(code) {
+                try {
+                    await axios.post('/auth/callback', { code });
+                    window.location.href = '/dashboard';
+                } catch (error) {
+                    window.location.href = '/auth/signin';
+                }
+            }
         },
         delimiters: ['${', '}']
     });

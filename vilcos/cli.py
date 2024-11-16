@@ -3,6 +3,8 @@ import typer
 import asyncio
 from pathlib import Path
 import importlib.metadata
+import uvicorn
+from typing import Optional
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -16,6 +18,23 @@ def get_version():
 def version():
     """Show the vilcos version."""
     typer.echo(f"Vilcos version: {get_version()}")
+
+@app.command()
+def run(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    reload: bool = True,
+    workers: Optional[int] = None
+):
+    """Run the development server."""
+    typer.echo(f"Starting vilcos server on http://{host}:{port}")
+    uvicorn.run(
+        "vilcos.main:app",
+        host=host,
+        port=port,
+        reload=reload,
+        workers=workers
+    )
 
 @app.command()
 def init_db():
@@ -39,5 +58,9 @@ def shell():
     
     embed()
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the CLI."""
     app()
+
+if __name__ == "__main__":
+    main()

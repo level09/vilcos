@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from vilcos.config import settings
-from typing import AsyncGenerator, AsyncContextManager
+from typing import AsyncGenerator
 from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
-    connect_args={"statement_cache_size": 0}  # Ensure this is set to disable prepared statements cache
+    connect_args={"statement_cache_size": 0}
 )
 
 AsyncSessionMaker = async_sessionmaker(
@@ -43,7 +43,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 @asynccontextmanager
-async def manage_db(app: FastAPI) -> AsyncContextManager[None]:
+async def manage_db(app: FastAPI):
     """Context manager for database lifecycle management."""
     try:
         yield
@@ -52,5 +52,6 @@ async def manage_db(app: FastAPI) -> AsyncContextManager[None]:
 
 
 async def create_tables():
+    """Create all database tables."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

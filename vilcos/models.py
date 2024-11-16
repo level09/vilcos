@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, Boolean
 from sqlalchemy.sql import func
 from vilcos.database import Base
 

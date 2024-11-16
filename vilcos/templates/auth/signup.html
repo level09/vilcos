@@ -3,112 +3,86 @@
 {% block title %}Sign Up{% endblock %}
 
 {% block content %}
-<v-card width="500" class="mt-10">
-    <v-form @submit.prevent="submitForm" id="signupForm" ref="form">
-        <v-toolbar color="primary" dark text>
-            <v-toolbar-title>Create Account</v-toolbar-title>
-            <v-spacer></v-spacer>
-        </v-toolbar>
-        <v-card-text>
-            <v-text-field
-                label="Username"
-                v-model="formData.username"
-                prepend-icon="mdi-account"
-                type="text"
-                variant="underlined"
-                :rules="[v => !!v || 'Username is required']"
-            ></v-text-field>
+<v-container class="fill-height">
+    <v-row justify="center">
+        <v-col cols="12" sm="8" md="6" lg="4">
+            <v-card>
+                <v-card-title>Create Account</v-card-title>
+                <v-card-text>
+                    <v-form @submit.prevent="handleSubmit">
+                        <v-text-field
+                            v-model="email"
+                            label="Email"
+                            type="email"
+                            required
+                        ></v-text-field>
 
-            <v-text-field
-                label="Email"
-                v-model="formData.email"
-                prepend-icon="mdi-email"
-                type="email"
-                variant="underlined"
-                :rules="[
-                    v => !!v || 'Email is required',
-                    v => /.+@.+\..+/.test(v) || 'Email must be valid'
-                ]"
-            ></v-text-field>
+                        <v-text-field
+                            v-model="password"
+                            label="Password"
+                            type="password"
+                            required
+                        ></v-text-field>
 
-            <v-text-field
-                label="Password"
-                v-model="formData.password"
-                prepend-icon="mdi-lock"
-                type="password"
-                variant="underlined"
-                :rules="[v => !!v || 'Password is required']"
-            ></v-text-field>
+                        <v-btn
+                            block
+                            color="primary"
+                            type="submit"
+                            :loading="loading"
+                        >
+                            Sign Up
+                        </v-btn>
+                    </v-form>
 
-            <v-text-field
-                label="Confirm Password"
-                v-model="formData.confirmPassword"
-                prepend-icon="mdi-lock-check"
-                type="password"
-                variant="underlined"
-                :rules="[
-                    v => !!v || 'Password confirmation is required',
-                    v => v === formData.password || 'Passwords must match'
-                ]"
-            ></v-text-field>
-        </v-card-text>
-
-        <v-card-actions class="px-10 pb-8">
-            <v-spacer></v-spacer>
-            <v-btn variant="elevated" block type="submit" color="primary">Sign Up</v-btn>
-        </v-card-actions>
-    </v-form>
-</v-card>
+                    <div class="text-center mt-4">
+                        <v-btn
+                            variant="text"
+                            href="/auth/signin"
+                        >
+                            Sign In Instead
+                        </v-btn>
+                    </div>
+                </v-card-text>
+            </v-card>
+        </v-col>
+    </v-row>
+</v-container>
 {% endblock %}
 
 {% block scripts %}
 <script>
-const { createApp } = Vue;
-const { createVuetify } = Vuetify;
-const vuetify = createVuetify();
+    const { createApp } = Vue;
+    const { createVuetify } = Vuetify;
+    const vuetify = createVuetify();
 
-const app = createApp({
-    data() {
-        return {
-            drawer: false,
-            snackBar: false,
-            snackMessage: '',
-            menu: null,
-            formData: {
-                username: '',
+    const app = createApp({
+        data() {
+            return {
                 email: '',
                 password: '',
-                confirmPassword: ''
+                loading: false,
+                drawer: false
             }
-        };
-    },
-    methods: {
-        showSnack(message) {
-            this.snackMessage = message;
-            this.snackBar = true;
         },
-        async submitForm() {
-            const form = this.$refs.form;
-            if (form.validate()) {
+        methods: {
+            async handleSubmit() {
+                this.loading = true;
                 try {
-                    const response = await axios.post('/auth/signup', this.formData);
-                    if (response.data.success) {
-                        this.showSnack('Account created successfully!');
-                        // Redirect to the dashboard or the specified route
-                        window.location.href = response.data.redirect || '/dashboard';
-                    } else {
-                        this.showSnack('Error creating account: ' + response.data.detail);
-                    }
+                    const response = await axios.post('/auth/signup', {
+                        email: this.email,
+                        password: this.password
+                    });
+                    window.location.href = '/dashboard';
                 } catch (error) {
-                    const errorMessage = error.response?.data?.detail || 'An unknown error occurred';
-                    this.showSnack('Error: ' + errorMessage);
+                    console.error('Sign-up error:', error);
+                } finally {
+                    this.loading = false;
                 }
             }
-        }
-    },
-    delimiters: ['${', '}']
-});
+        },
+        delimiters: ['${', '}']
+    });
 
-app.use(vuetify).mount('#app');
+    app.use(vuetify).mount('#app');
 </script>
 {% endblock %}

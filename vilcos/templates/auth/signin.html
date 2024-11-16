@@ -1,62 +1,55 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Sign In{% endblock %}
 
 {% block content %}
-<v-card width="500" class="mt-10">
-    <v-form @submit.prevent="submit" id="loginForm" ref="form">
-        <v-toolbar color="primary" dark text>
-            <v-toolbar-title>Account Login</v-toolbar-title>
-            <v-spacer></v-spacer>
-        </v-toolbar>
-        <v-card-text>
-            <div class="mt-4">
-    <v-btn prepend-icon="mdi-github" variant="tonal"  href="/auth/signin/github" class="btn w-100">
+<v-container class="fill-height">
+    <v-row justify="center">
+        <v-col cols="12" sm="8" md="6" lg="4">
+            <v-card>
+                <v-card-title>Sign In</v-card-title>
+                <v-card-text>
+                    <v-form @submit.prevent="handleSubmit">
+                        <v-text-field
+                            v-model="email"
+                            label="Email"
+                            type="email"
+                            required
+                        ></v-text-field>
 
-        Sign in with Github
-    </v-btn>
+                        <v-text-field
+                            v-model="password"
+                            label="Password"
+                            type="password"
+                            required
+                        ></v-text-field>
 
-</div>
+                        <v-btn
+                            block
+                            color="primary"
+                            type="submit"
+                            :loading="loading"
+                        >
+                            Sign In
+                        </v-btn>
+                    </v-form>
 
-
-
-        </v-card-text>
-        <v-divider class="my-5 mx-5"></v-divider>
-        <v-card-text>
-            <v-text-field
-                v-model="formData.email"
-                label="Email"
-                name="email"
-                prepend-icon="mdi-account"
-                type="text"
-                variant="underlined"
-                :rules="[v => !!v || 'Email is required']"
-            ></v-text-field>
-
-            <v-text-field
-                v-model="formData.password"
-                id="password"
-                label="Password"
-                name="password"
-                prepend-icon="mdi-lock-question"
-                type="password"
-                variant="underlined"
-                :rules="[v => !!v || 'Password is required']"
-            ></v-text-field>
-        </v-card-text>
-
-        <v-card-actions class="px-10 pb-8">
-            <v-spacer></v-spacer>
-            <v-btn variant="elevated" block type="submit" color="primary" :loading="loading">Login</v-btn>
-        </v-card-actions>
-    </v-form>
-</v-card>
-
-<v-snackbar v-model="snackBar" :timeout="3000" :color="snackColor">
-    ${ snackMessage }
-</v-snackbar>
+                    <div class="text-center mt-4">
+                        <v-btn
+                            variant="text"
+                            href="/auth/signup"
+                        >
+                            Create Account
+                        </v-btn>
+                    </div>
+                </v-card-text>
+            </v-card>
+        </v-col>
+    </v-row>
+</v-container>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     const { createApp } = Vue;
     const { createVuetify } = Vuetify;
@@ -65,44 +58,25 @@
     const app = createApp({
         data() {
             return {
-                formData: {
-                    email: '',
-                    password: ''
-                },
-                drawer: false,
-                snackBar: false,
-                snackMessage: '',
-                snackColor: 'success',
-                menu: null,
-                loading: false
-            };
+                email: '',
+                password: '',
+                loading: false,
+                drawer: false
+            }
         },
         methods: {
-            showSnack(message, color = 'success') {
-                this.snackMessage = message;
-                this.snackColor = color;
-                this.snackBar = true;
-            },
-            submit() {
-                const form = this.$refs.form;
-                if (form.validate()) {
-                    this.loading = true;
-                    axios.post('/auth/signin', this.formData)
-                        .then(response => {
-                            if (response.data.success) {
-                                this.showSnack(response.data.message);
-                                // Redirect to dashboard or specified URL
-                                window.location.href = response.data.redirect;
-                            } else {
-                                this.showSnack(response.data.message, 'error');
-                            }
-                        })
-                        .catch(error => {
-                            this.showSnack(error.response?.data?.message || 'An error occurred', 'error');
-                        })
-                        .finally(() => {
-                            this.loading = false;
-                        });
+            async handleSubmit() {
+                this.loading = true;
+                try {
+                    const response = await axios.post('/auth/signin', {
+                        email: this.email,
+                        password: this.password
+                    });
+                    window.location.href = '/dashboard';
+                } catch (error) {
+                    console.error('Sign-in error:', error);
+                } finally {
+                    this.loading = false;
                 }
             }
         },
