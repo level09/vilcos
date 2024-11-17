@@ -5,6 +5,8 @@ from pathlib import Path
 import importlib.metadata
 import uvicorn
 from typing import Optional
+import os
+import sys
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -21,15 +23,47 @@ def version():
 
 @app.command()
 def run(
+    app_dir: str = typer.Option(".", help="Application directory"),
     host: str = "127.0.0.1",
     port: int = 8000,
     reload: bool = True,
-    workers: Optional[int] = None
+    workers: Optional[int] = None,
+    app_module: str = typer.Option(None, help="Module path to ASGI app (eg: 'app:app')")
 ):
     """Run the development server."""
-    typer.echo(f"Starting vilcos server on http://{host}:{port}")
+    # Add the current directory to Python path
+    cwd = os.getcwd()
+    sys.path.insert(0, cwd)
+    
+    # Validate app directory
+    app_path = Path(app_dir).resolve()
+    if not app_path.exists():
+        typer.echo(f"Error: Directory '{app_dir}' does not exist", err=True)
+        raise typer.Exit(1)
+    
+    # Change to the app directory
+    os.chdir(app_path)
+    
+    # Auto-detect the application module
+    if app_module is None:
+        if (app_path / "app.py").exists():
+            app_module = "app:app"
+        elif (app_path / "main.py").exists():
+            app_module = "main:app"
+        else:
+            # Default to vilcos framework app if no local app is found
+            app_module = "vilcos.main:app"
+            # Add the package directory to Python path for framework mode
+            package_dir = str(Path(__file__).parent.parent)
+            if package_dir not in sys.path:
+                sys.path.insert(0, package_dir)
+    
+    typer.echo(f"Starting server on http://{host}:{port}")
+    typer.echo(f"Application directory: {app_path}")
+    typer.echo(f"Using application: {app_module}")
+    
     uvicorn.run(
-        "vilcos.main:app",
+        app_module,
         host=host,
         port=port,
         reload=reload,
