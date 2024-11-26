@@ -7,11 +7,13 @@ from vilcos.config import Settings
 from gotrue.errors import AuthApiError
 from datetime import datetime
 from vilcos.dependencies import login_required
+from vilcos.utils import get_root_path
+import os
 
 router = APIRouter()
 settings = Settings()
 supabase: Client = create_client(settings.supabase_url, settings.supabase_key)
-templates = Jinja2Templates(directory="vilcos/templates")
+templates = Jinja2Templates(directory=os.path.join(get_root_path(), "templates"))
 
 
 @router.get("/signin")
@@ -157,8 +159,3 @@ async def process_tokens(request: Request):
 @router.get("/protected")
 async def protected_route(user: dict = Depends(login_required)):
     return {"message": "This is a protected route", "user": user}
-
-
-
-
-

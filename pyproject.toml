@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "vilcos"
-version = "0.1.0"
+version = "0.1.1"
 description = "A FastAPI-based web framework"
 authors = [{name = "Nidal Alhariri", email = "level09@gmail.com"}]
 readme = "README.md"
@@ -33,4 +33,8 @@ dependencies = [
 ]
 
 [project.scripts]
-vilcos = "vilcos.cli:main" 
+vilcos = "vilcos.cli:main"
+
+[project.urls]
+Home = "https://github.com/level09/vilcos"
+Source = "https://github.com/level09/vilcos" 
