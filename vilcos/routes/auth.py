@@ -124,7 +124,7 @@ async def signin(
 @router.post("/signout")
 async def signout(request: Request):
     logout_user(request)
-    return RedirectResponse(url="/auth/signin")
+    return {"message": "Successfully signed out"}
 
 @router.get("/me")
 async def get_user(request: Request, user: User | None = Depends(get_current_user)):
