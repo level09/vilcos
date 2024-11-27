@@ -26,8 +26,7 @@ app.add_middleware(
     session_cookie=settings.session_cookie_name,
     max_age=settings.session_cookie_max_age,
     same_site=settings.session_cookie_samesite,
-    https_only=settings.session_cookie_secure,
-    httponly=settings.session_cookie_httponly
+    https_only=settings.session_cookie_secure
 )
 
 # Get root path and setup directories

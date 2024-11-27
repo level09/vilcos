@@ -54,4 +54,10 @@ async def manage_db(app: FastAPI):
 async def create_tables():
     """Create all database tables."""
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        try:
+            logger.info("Starting table creation")
+            await conn.run_sync(Base.metadata.create_all)
+            logger.info("Table creation completed successfully")
+        except Exception as e:
+            logger.error(f"Error during table creation: {e}")
+            raise

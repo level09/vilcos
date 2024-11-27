@@ -3,8 +3,13 @@ import typer
 import asyncio
 import uvicorn
 import importlib.metadata
+from rich.console import Console
+
+console = Console()
 
 app = typer.Typer(no_args_is_help=True)
+
+from vilcos.models import *
 
 @app.command()
 def version():
@@ -34,14 +39,15 @@ def run(
 @app.command()
 def init_db():
     """Initialize the database."""
-    from vilcos.db import create_tables
+    from vilcos.db import create_tables, engine, Base
 
     async def _init_db():
         try:
+            console.print(f"[bold green]Connecting to database at [underline]{engine.url}[/underline][/bold green]")
             await create_tables()
-            typer.echo("Database initialized successfully.")
+            console.print("[bold green]Database initialized successfully.[/bold green]")
         except Exception as e:
-            typer.echo(f"Database initialization failed: {e}", err=True)
+            console.print(f"[bold red]Database initialization failed: {e}[/bold red]", style="bold red")
             raise typer.Exit(1)
 
     asyncio.run(_init_db())
@@ -55,6 +61,17 @@ def shell():
     except ImportError:
         typer.echo("Please install IPython: pip install ipython")
         raise typer.Exit(1)
+
+@app.command()
+def show_settings():
+    """Print the current settings if in debug mode."""
+    from vilcos.config import settings
+    if settings.debug:
+        typer.echo("Current Settings:")
+        for field, value in settings.dict().items():
+            typer.echo(f"{field}: {value}")
+    else:
+        typer.echo("Debug mode is off. Settings are not displayed.")
 
 def main():
     """Entry point for the CLI."""
