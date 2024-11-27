@@ -20,7 +20,15 @@ app = FastAPI()
 redis = aioredis.from_url(settings.redis_url)
 
 # Add session middleware
-app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.secret_key,
+    session_cookie=settings.session_cookie_name,
+    max_age=settings.session_cookie_max_age,
+    same_site=settings.session_cookie_samesite,
+    https_only=settings.session_cookie_secure,
+    httponly=settings.session_cookie_httponly
+)
 
 # Get root path and setup directories
 root_path = get_root_path()
