@@ -19,12 +19,13 @@
                         ${error}
                     </v-alert>
                     
-                    <v-form @submit.prevent="handleSubmit">
+                    <form @submit.prevent="handleSubmit">
                         <v-text-field
                             v-model="username"
                             label="Username"
                             type="text"
                             required
+                            minlength="3"
                         ></v-text-field>
 
                         <v-text-field
@@ -32,6 +33,7 @@
                             label="Email"
                             type="email"
                             required
+                            minlength="3"
                         ></v-text-field>
 
                         <v-text-field
@@ -39,6 +41,7 @@
                             label="Password"
                             type="password"
                             required
+                            minlength="6"
                         ></v-text-field>
 
                         <v-btn
@@ -49,7 +52,7 @@
                         >
                             Sign Up
                         </v-btn>
-                    </v-form>
+                    </form>
 
                     <div class="text-center mt-4">
                         <v-btn
@@ -79,7 +82,6 @@
                 email: '',
                 password: '',
                 loading: false,
-                drawer: false,
                 error: ''
             }
         },

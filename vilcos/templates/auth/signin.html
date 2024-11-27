@@ -9,12 +9,23 @@
             <v-card>
                 <v-card-title>Sign In</v-card-title>
                 <v-card-text>
-                    <v-form @submit.prevent="handleSubmit">
+                    <v-alert
+                        v-if="error"
+                        type="error"
+                        class="mb-4"
+                        closable
+                        @click="error = ''"
+                    >
+                        ${error}
+                    </v-alert>
+
+                    <form @submit.prevent="handleSubmit">
                         <v-text-field
                             v-model="email"
                             label="Email"
                             type="email"
                             required
+                            minlength="3"
                         ></v-text-field>
 
                         <v-text-field
@@ -22,6 +33,7 @@
                             label="Password"
                             type="password"
                             required
+                            minlength="6"
                         ></v-text-field>
 
                         <v-btn
@@ -32,7 +44,7 @@
                         >
                             Sign In
                         </v-btn>
-                    </v-form>
+                    </form>
 
                     <div class="text-center mt-4">
                         <v-btn
@@ -61,20 +73,27 @@
                 email: '',
                 password: '',
                 loading: false,
-                drawer: false
+                error: ''
             }
         },
         methods: {
             async handleSubmit() {
                 this.loading = true;
+                this.error = '';
+                
                 try {
                     const response = await axios.post('/auth/signin', {
                         email: this.email,
                         password: this.password
                     });
-                    window.location.href = '/dashboard';
+                    
+                    if (response.data.error) {
+                        this.error = response.data.error;
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
                 } catch (error) {
-                    console.error('Sign-in error:', error);
+                    this.error = error.response?.data?.error || 'An error occurred during sign in';
                 } finally {
                     this.loading = false;
                 }

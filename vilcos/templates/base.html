@@ -60,6 +60,9 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <!-- Base App -->
+   
+
+    {% block scripts %}
     <script>
         const { createApp } = Vue;
         const { createVuetify } = Vuetify;
@@ -106,8 +109,8 @@
 
         app.use(vuetify).mount('#app');
     </script>
-
-    {% block scripts %}{% endblock %}
+    
+    {% endblock %}
 </body>
 
 </html>
