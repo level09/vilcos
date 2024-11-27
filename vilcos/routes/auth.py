@@ -7,10 +7,11 @@ from pydantic import BaseModel, EmailStr
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
-from vilcos.models import User
+from vilcos.models import User, Role
 from vilcos.db import get_db
 from vilcos.utils import get_root_path
 from vilcos.auth_utils import get_current_user, login_user, logout_user
+from vilcos.config import settings
 import os
 
 router = APIRouter()
@@ -57,11 +58,21 @@ async def signup(
                 content={"error": "Username already taken"}
             )
         
-        # Create new user with hashed password
+        # Get default user role
+        result = await db.execute(select(Role).filter(Role.name == "user"))
+        default_role = result.scalar_one_or_none()
+        if not default_role:
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"error": "Default role not found"}
+            )
+        
+        # Create new user with hashed password and default role
         user = User(
             email=data.email,
             username=data.username,
-            password=User.get_password_hash(data.password)
+            password=User.get_password_hash(data.password),
+            role_id=default_role.id
         )
         db.add(user)
         await db.commit()
@@ -125,17 +136,3 @@ async def signin(
 async def signout(request: Request):
     logout_user(request)
     return {"message": "Successfully signed out"}
-
-@router.get("/me")
-async def get_user(request: Request, user: User | None = Depends(get_current_user)):
-    """Get current user information."""
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
-        )
-    return {
-        "id": user.id,
-        "email": user.email,
-        "username": user.username
-    }

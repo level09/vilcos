@@ -3,23 +3,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-from vilcos.db import manage_db, get_db, init_db
 from vilcos.routes import auth, websockets
 from vilcos.config import settings
 from vilcos.utils import get_root_path
-from vilcos.auth_utils import auth_required
-from vilcos.schemas import UserSchema
-from sqlalchemy.ext.asyncio import AsyncSession
-from contextlib import asynccontextmanager
+from vilcos.auth_utils import get_current_user
 import os
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    async with manage_db(app):
-        await init_db()
-        yield
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 # Mount static files and templates
 app.mount("/static", StaticFiles(directory=os.path.join(get_root_path(), "static")), name="static")
@@ -40,17 +30,23 @@ app.add_middleware(
 )
 
 @app.get("/")
-async def root():
+async def home(request: Request):
     return RedirectResponse(url="/dashboard")
 
 @app.get("/dashboard")
-@auth_required(redirect_to_signin=True)
 async def dashboard(
     request: Request,
-    db: AsyncSession = Depends(get_db),
-    user: UserSchema = None
+    user = Depends(get_current_user)
 ):
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
-        "user": user
-    })
+    if not user:
+        return RedirectResponse(url="/auth/signin", status_code=303)
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request, "user": user}
+    )
+
+# Basic database cleanup on shutdown
+@app.on_event("shutdown")
+async def shutdown_event():
+    from vilcos.db import engine
+    await engine.dispose()

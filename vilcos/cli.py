@@ -39,13 +39,36 @@ def run(
 @app.command()
 def init_db():
     """Initialize the database."""
-    from vilcos.db import init_db as db_init, engine, Base
+    from vilcos.db import engine, Base
+    from vilcos.models import Role  # Import models to register them with Base
 
     async def _init_db():
         try:
             console.print(f"[bold green]Connecting to database at [underline]{engine.url}[/underline][/bold green]")
-            await db_init()
-            console.print("[bold green]Database initialized successfully.[/bold green]")
+            
+            # First, create all tables
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+                console.print("[bold green]Tables created successfully[/bold green]")
+            
+            # Then initialize default roles using AsyncSessionLocal
+            from vilcos.db import AsyncSessionLocal
+            async with AsyncSessionLocal() as session:
+                # Check if roles already exist
+                from sqlalchemy.future import select
+                result = await session.execute(select(Role).where(Role.name == "admin"))
+                if not result.scalar_one_or_none():
+                    default_roles = [
+                        Role(name="admin", description="Administrator with full access"),
+                        Role(name="user", description="Regular user with standard access")
+                    ]
+                    session.add_all(default_roles)
+                    await session.commit()
+                    console.print("[bold green]Default roles created successfully[/bold green]")
+                else:
+                    console.print("[yellow]Default roles already exist[/yellow]")
+            
+            console.print("[bold green]Database initialization completed successfully[/bold green]")
         except Exception as e:
             console.print(f"[bold red]Database initialization failed: {e}[/bold red]", style="bold red")
             raise typer.Exit(1)

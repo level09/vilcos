@@ -7,53 +7,35 @@
     <v-row justify="center">
         <v-col cols="12" sm="8" md="6" lg="4">
             <v-card>
-                <v-card-title>Sign In</v-card-title>
+
+                <v-toolbar>
+                    <v-toolbar-title>Sign In</v-toolbar-title>
+                </v-toolbar>
+
                 <v-card-text>
-                    <v-alert
-                        v-if="error"
-                        type="error"
-                        class="mb-4"
-                        closable
-                        @click="error = ''"
-                    >
-                        ${error}
-                    </v-alert>
+
 
                     <form @submit.prevent="handleSubmit">
-                        <v-text-field
-                            v-model="email"
-                            label="Email"
-                            type="email"
-                            required
-                            minlength="3"
-                        ></v-text-field>
+                        <v-text-field v-model="email" label="Email" type="email" required minlength="3"></v-text-field>
 
-                        <v-text-field
-                            v-model="password"
-                            label="Password"
-                            type="password"
-                            required
-                            minlength="6"
-                        ></v-text-field>
+                        <v-text-field v-model="password" label="Password" type="password" required
+                            minlength="6"></v-text-field>
 
-                        <v-btn
-                            block
-                            color="primary"
-                            type="submit"
-                            :loading="loading"
-                        >
+                        <v-btn block color="primary" type="submit" :loading="loading">
                             Sign In
                         </v-btn>
                     </form>
 
                     <div class="text-center mt-4">
-                        <v-btn
-                            variant="text"
-                            href="/auth/signup"
-                        >
+                        <v-btn variant="text" href="/auth/signup">
                             Create Account
                         </v-btn>
                     </div>
+                </v-card-text>
+                <v-card-text>
+                    <v-alert v-if="error" type="error" class="mb-4" closable @click="error = ''">
+                        ${error}
+                    </v-alert>
                 </v-card-text>
             </v-card>
         </v-col>
@@ -80,13 +62,13 @@
             async handleSubmit() {
                 this.loading = true;
                 this.error = '';
-                
+
                 try {
                     const response = await axios.post('/auth/signin', {
                         email: this.email,
                         password: this.password
                     });
-                    
+
                     if (response.data.error) {
                         this.error = response.data.error;
                     } else {

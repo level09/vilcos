@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, DateTime, Boolean, String
+from sqlalchemy import Column, Integer, DateTime, Boolean, String, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from vilcos.db import Base
 from argon2 import PasswordHasher
@@ -14,13 +15,25 @@ class BaseModel(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     is_active = Column(Boolean, default=True)
 
+class Role(BaseModel):
+    __tablename__ = "roles"
+    
+    name = Column(String, unique=True, index=True)
+    description = Column(String, nullable=True)
+    
+    # Relationship with users
+    users = relationship("User", back_populates="role")
+
 class User(BaseModel):
     __tablename__ = "users"
     
     email = Column(String, unique=True, index=True)
     username = Column(String, unique=True, index=True)
     password = Column(String)
-    is_admin = Column(Boolean, default=False)
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
+    
+    # Relationship with role
+    role = relationship("Role", back_populates="users")
 
     @property
     def is_authenticated(self):

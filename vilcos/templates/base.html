@@ -34,9 +34,7 @@
                 <v-navigation-drawer v-model="drawer" app width="310" expand-on-hover>
                     <v-list density="compact">
                         <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" href="/dashboard"></v-list-item>
-                        <v-list-item v-if="!user" prepend-icon="mdi-login" title="Sign In" href="/auth/signin"></v-list-item>
-                        <v-list-item v-if="!user" prepend-icon="mdi-account-plus" title="Sign Up" href="/auth/signup"></v-list-item>
-                        <v-list-item v-if="user" prepend-icon="mdi-logout" title="Sign Out" @click="handleSignOut"></v-list-item>
+                        
                     </v-list>
                 </v-navigation-drawer>
 
@@ -44,7 +42,7 @@
                     {% block content %}{% endblock %}
                 </v-main>
 
-                <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000">
+                <v-snackbar v-model="snackbar"  :timeout="3000">
                     ${ snackbarText }
                     <template v-slot:actions>
                         <v-btn variant="text" @click="snackbar = false">Close</v-btn>
@@ -63,52 +61,7 @@
    
 
     {% block scripts %}
-    <script>
-        const { createApp } = Vue;
-        const { createVuetify } = Vuetify;
-        const vuetify = createVuetify();
-
-        const app = createApp({
-            data() {
-                return {
-                    drawer: false,
-                    user: null,
-                    snackbar: false,
-                    snackbarText: '',
-                    snackbarColor: 'success'
-                }
-            },
-            methods: {
-                showMessage(message, color = 'success') {
-                    this.snackbarText = message;
-                    this.snackbarColor = color;
-                    this.snackbar = true;
-                },
-                async handleSignOut() {
-                    try {
-                        await axios.post('/auth/signout');
-                        window.location.href = '/auth/signin';
-                    } catch (error) {
-                        this.showMessage('Error signing out', 'error');
-                    }
-                },
-                async fetchUser() {
-                    try {
-                        const response = await axios.get('/auth/me');
-                        this.user = response.data;
-                    } catch (error) {
-                        this.user = null;
-                    }
-                }
-            },
-            mounted() {
-                this.fetchUser();
-            },
-            delimiters: ['${', '}']
-        });
-
-        app.use(vuetify).mount('#app');
-    </script>
+    
     
     {% endblock %}
 </body>
