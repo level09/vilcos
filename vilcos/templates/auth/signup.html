@@ -9,7 +9,24 @@
             <v-card>
                 <v-card-title>Create Account</v-card-title>
                 <v-card-text>
+                    <v-alert
+                        v-if="error"
+                        type="error"
+                        class="mb-4"
+                        closable
+                        @click="error = ''"
+                    >
+                        ${error}
+                    </v-alert>
+                    
                     <v-form @submit.prevent="handleSubmit">
+                        <v-text-field
+                            v-model="username"
+                            label="Username"
+                            type="text"
+                            required
+                        ></v-text-field>
+
                         <v-text-field
                             v-model="email"
                             label="Email"
@@ -58,23 +75,33 @@
     const app = createApp({
         data() {
             return {
+                username: '',
                 email: '',
                 password: '',
                 loading: false,
-                drawer: false
+                drawer: false,
+                error: ''
             }
         },
         methods: {
             async handleSubmit() {
                 this.loading = true;
+                this.error = '';
+                
                 try {
                     const response = await axios.post('/auth/signup', {
+                        username: this.username,
                         email: this.email,
                         password: this.password
                     });
-                    window.location.href = '/dashboard';
+                    
+                    if (response.data.error) {
+                        this.error = response.data.error;
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
                 } catch (error) {
-                    console.error('Sign-up error:', error);
+                    this.error = error.response?.data?.error || 'An error occurred during signup';
                 } finally {
                     this.loading = false;
                 }

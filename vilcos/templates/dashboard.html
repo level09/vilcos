@@ -8,7 +8,11 @@
         <v-col cols="12" md="8">
             <v-card class="mb-6">
                 <v-card-title class="text-h4 font-weight-bold">
+                    {% if user %}
+                    Welcome, {{ user.username }}!
+                    {% else %}
                     Welcome to Vilcos
+                    {% endif %}
                 </v-card-title>
                 <v-card-subtitle class="text-subtitle-1">
                     A modern FastAPI-based web framework with powerful features
@@ -40,6 +44,7 @@
 
                     <v-divider class="my-4"></v-divider>
 
+                    {% if not user %}
                     <v-row class="mt-4">
                         <v-col cols="12" sm="6">
                             <v-btn
@@ -64,6 +69,21 @@
                             </v-btn>
                         </v-col>
                     </v-row>
+                    {% else %}
+                    <v-row class="mt-4">
+                        <v-col cols="12">
+                            <v-btn
+                                block
+                                color="error"
+                                @click="handleSignOut"
+                                prepend-icon="mdi-logout"
+                                variant="elevated"
+                            >
+                                Sign Out
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                    {% endif %}
                 </v-card-text>
             </v-card>
 
@@ -106,43 +126,30 @@
 <script>
     const { createApp } = Vue;
     const { createVuetify } = Vuetify;
-    const vuetify = createVuetify({
-        icons: {
-            defaultSet: 'mdi',
-        },
-    });
+    const vuetify = createVuetify();
 
     const app = createApp({
         data() {
             return {
-                // You can add any reactive data here if needed
-            };
+                loading: false
+            }
         },
         methods: {
-            // You can add any methods here if needed
+            async handleSignOut() {
+                try {
+                    this.loading = true;
+                    const response = await axios.post('/auth/signout');
+                    window.location.href = '/auth/signin';
+                } catch (error) {
+                    console.error('Sign-out error:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }
         },
         delimiters: ['${', '}']
     });
 
     app.use(vuetify).mount('#app');
-
-    // WebSocket connection
-    const socket = new ReconnectingWebSocket('ws://' + window.location.host + '/live/ws/default');
-
-    socket.onopen = function(event) {
-        console.log('WebSocket is open now.');
-    };
-
-    socket.onmessage = function(event) {
-        console.log('Received:', event.data);
-    };
-
-    socket.onclose = function(event) {
-        console.log('WebSocket is closed now.');
-    };
-
-    socket.onerror = function(error) {
-        console.error('WebSocket error observed:', error);
-    };
 </script>
 {% endblock %}

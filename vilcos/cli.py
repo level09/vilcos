@@ -39,12 +39,12 @@ def run(
 @app.command()
 def init_db():
     """Initialize the database."""
-    from vilcos.db import create_tables, engine, Base
+    from vilcos.db import init_db as db_init, engine, Base
 
     async def _init_db():
         try:
             console.print(f"[bold green]Connecting to database at [underline]{engine.url}[/underline][/bold green]")
-            await create_tables()
+            await db_init()
             console.print("[bold green]Database initialized successfully.[/bold green]")
         except Exception as e:
             console.print(f"[bold red]Database initialization failed: {e}[/bold red]", style="bold red")

@@ -13,29 +13,22 @@ class Base(DeclarativeBase):
     pass
 
 
-DATABASE_URL = settings.database_url.replace(
-    'postgresql://', 'postgresql+asyncpg://'
-) if 'postgresql://' in settings.database_url else settings.database_url
-
 engine = create_async_engine(
-    DATABASE_URL,
+    settings.database_url.replace('postgresql://', 'postgresql+asyncpg://'),
     echo=settings.debug,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-    connect_args={"statement_cache_size": 0}
 )
 
-AsyncSessionMaker = async_sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
-    expire_on_commit=False
+    expire_on_commit=False,
 )
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency for getting async database sessions."""
-    async with AsyncSessionMaker() as session:
+    async with AsyncSessionLocal() as session:
         try:
             yield session
         finally:
@@ -51,7 +44,7 @@ async def manage_db(app: FastAPI):
         await engine.dispose()
 
 
-async def create_tables():
+async def init_db() -> None:
     """Create all database tables."""
     async with engine.begin() as conn:
         try:

@@ -45,6 +45,15 @@ class Settings(BaseSettings):
             raise ValueError("redis_url must be a valid Redis URL")
         return v
 
+    @validator("session_cookie_max_age", pre=True)
+    def validate_session_cookie_max_age(cls, v):
+        if isinstance(v, str):
+            try:
+                return int(v.strip())
+            except ValueError:
+                raise ValueError("session_cookie_max_age must be a valid integer")
+        return v
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

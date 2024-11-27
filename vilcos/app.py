@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
@@ -8,7 +8,7 @@ from vilcos.db import manage_db
 from vilcos.routes import auth, websockets
 from vilcos.config import settings
 from vilcos.utils import get_root_path
-from vilcos.auth_utils import login_required
+from vilcos.auth_utils import get_current_user, get_current_user_or_401
 import os
 import logging
 
@@ -54,8 +54,14 @@ async def root():
     return RedirectResponse(url="/dashboard")
 
 @app.get("/dashboard")
-async def dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+async def dashboard(
+    request: Request,
+    user = Depends(get_current_user)
+):
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request,
+        "user": user
+    })
 
 @app.on_event("startup")
 async def startup():
