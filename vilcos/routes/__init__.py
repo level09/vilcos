@@ -1,4 +1,4 @@
-"""Routes package for Vilcos"""
-from . import api, auth, websockets
+"""Routes package."""
+from . import auth, websockets
 
-__all__ = ["api", "auth", "websockets"]
+__all__ = ["auth", "websockets"]

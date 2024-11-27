@@ -1,14 +1,14 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 import redis.asyncio as aioredis
-from vilcos.database import manage_db
-from vilcos.routes.api import router as api_router
+from vilcos.db import manage_db
 from vilcos.routes import auth, websockets
 from vilcos.config import settings
 from vilcos.utils import get_root_path
+from vilcos.auth_utils import login_required
 import os
 import logging
 
@@ -36,7 +36,11 @@ templates = Jinja2Templates(directory=templates_dir)
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(websockets.router, prefix="/live", tags=["websockets"])
-app.include_router(api_router)
+
+@app.get("/api/health")
+async def health_check():
+    """Basic health check endpoint."""
+    return {"status": "ok"}
 
 @app.get("/")
 async def root():
@@ -49,4 +53,4 @@ async def dashboard(request: Request):
 @app.on_event("startup")
 async def startup():
     async with manage_db(app):
-        pass
+        pass  # Database initialization if needed

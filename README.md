@@ -4,18 +4,22 @@ A modern, full-stack web framework built on FastAPI and Vue.js with real-time ca
 
 ## Features ✨
 
-- **Real-time WebSockets** - Built-in support for multi-channel WebSocket communication
 - **Modern UI** - Integrated with Vue 3 + Vuetify for beautiful interfaces
-- **Authentication** - Complete auth system with Supabase integration
+- **Authentication** - Simple, secure session-based auth with Argon2 password hashing
 - **Database** - Async SQLAlchemy with connection pooling
 - **API Ready** - FastAPI-powered REST endpoints with automatic OpenAPI docs
 - **Developer Friendly** - CLI tools, hot reloading, and interactive shell
+- **Real-time WebSockets** - Built-in support for multi-channel WebSocket communication
 
 ## Quick Start 🏃
 
 ### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/vilcos.git
+cd vilcos
+
 # Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
@@ -24,21 +28,16 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install vilcos
 ```
 
-### Setup
+### Environment Setup
 
-1. Create project and environment:
+1. Set up your environment variables:
 
 ```bash
-mkdir myproject && cd myproject
+# Copy the sample environment file
+cp .env.sample .env
 
-# Create .env file
-cat > .env << EOF
-DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
-SUPABASE_URL=your-supabase-url
-SUPABASE_KEY=your-supabase-key
-SECRET_KEY=your-secret-key
-REDIS_URL=redis://localhost:6379
-EOF
+# Edit .env with your configuration
+vim .env  # or use your preferred editor
 ```
 
 2. Initialize and run:
@@ -53,15 +52,52 @@ Your app is now running at http://localhost:8000 🎉
 ## Project Structure 📁
 
 ```
-myproject/
-├── .env                # Configuration
-└── vilcos/            # Application
-    ├── static/        # Assets
-    ├── templates/     # Views
-    ├── routes/        # Endpoints
+vilcos/
+├── .env.sample          # Sample environment configuration
+├── pyproject.toml      # Project configuration and dependencies
+├── requirements.txt    # Python dependencies
+└── vilcos/            # Main package
+    ├── static/        # Static assets
+    ├── templates/     # View templates
+    ├── routes/        # API endpoints and routes
+    │   ├── auth.py    # Authentication routes
+    │   └── ws.py      # WebSocket routes
     ├── models.py      # Database models
-    └── config.py      # Settings
+    ├── config.py      # Application settings
+    ├── db.py         # Database configuration and utilities
+    ├── utils.py      # Utility functions
+    ├── cli.py        # Command-line interface
+    └── app.py        # Application entry point
 ```
+
+## Authentication 🔑
+
+Vilcos uses a simple but secure session-based authentication system:
+
+- **Secure Password Storage**: Argon2 hashing (winner of the Password Hashing Competition)
+- **Session Management**: Redis-backed sessions with secure defaults
+- **Cookie Security**: HTTPOnly, Secure, and SameSite flags enabled
+- **Database Integration**: Direct SQLAlchemy models for user management
+
+### Routes
+
+- `/auth/signin` - User login
+- `/auth/signup` - New user registration
+- `/auth/signout` - User logout
+- `/auth/me` - Get current user info
+
+### Security Best Practices
+
+1. Generate a strong secret key:
+```python
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+2. In production:
+- Set `SESSION_COOKIE_SECURE=True`
+- Use HTTPS
+- Configure Redis with authentication
+- Use strong database passwords
 
 ## Key Features 🔑
 
@@ -75,12 +111,6 @@ ws.send(JSON.stringify({ message: 'Hello!' }));
 // Receive messages
 ws.onmessage = (event) => console.log(JSON.parse(event.data));
 ```
-
-### Authentication
-- Built-in routes: `/auth/signin`, `/auth/signup`, `/auth/signout`
-- Supabase integration
-- GitHub OAuth support
-- Session management with Redis
 
 ### CLI Tools
 
@@ -103,8 +133,6 @@ Essential `.env` settings:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
-SUPABASE_URL=your-project-url
-SUPABASE_KEY=your-api-key
 SECRET_KEY=your-secret-key
 REDIS_URL=redis://localhost:6379
 ```

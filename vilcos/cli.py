@@ -25,7 +25,7 @@ def run(
     typer.echo(f"Starting server at http://{host}:{port}")
     
     uvicorn.run(
-        "vilcos.main:app",
+        "vilcos.app:app",
         host=host,
         port=port,
         reload=reload,
@@ -34,7 +34,7 @@ def run(
 @app.command()
 def init_db():
     """Initialize the database."""
-    from vilcos.database import create_tables
+    from vilcos.db import create_tables
 
     async def _init_db():
         try:
