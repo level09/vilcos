@@ -4,12 +4,49 @@ import asyncio
 import uvicorn
 import importlib.metadata
 from rich.console import Console
+from typing import Dict, Any, Callable
+from functools import update_wrapper
+from sqlalchemy.future import select
+from vilcos.models import *
+from vilcos.db import AsyncSession
 
 console = Console()
 
 app = typer.Typer(no_args_is_help=True)
 
-from vilcos.models import *
+_shell_context_processors: list[Callable[[], Dict[str, Any]]] = []
+
+def shell_context_processor(f: Callable[[], Dict[str, Any]]) -> Callable[[], Dict[str, Any]]:
+    """Decorator to register a shell context processor function."""
+    _shell_context_processors.append(f)
+    return update_wrapper(wrapper=f, wrapped=f)
+
+def get_shell_context() -> Dict[str, Any]:
+    """Get the shell context objects."""
+    ctx = {
+        "User": User,
+        "Role": Role,
+        "select": select,
+        "AsyncSession": AsyncSession,
+    }
+    
+    # Update context with registered processors
+    for processor in _shell_context_processors:
+        ctx.update(processor())
+    
+    return ctx
+
+@shell_context_processor
+def utility_context() -> Dict[str, Any]:
+    """Add utility functions to shell context."""
+    async def count_users(session: AsyncSession) -> int:
+        result = await session.execute(select(User))
+        return len(result.scalars().all())
+    
+    return {
+        "count_users": count_users,
+        "APP_VERSION": "1.0.0",
+    }
 
 @app.command()
 def version():
@@ -55,7 +92,6 @@ def init_db():
             from vilcos.db import AsyncSessionLocal
             async with AsyncSessionLocal() as session:
                 # Check if roles already exist
-                from sqlalchemy.future import select
                 result = await session.execute(select(Role).where(Role.name == "admin"))
                 if not result.scalar_one_or_none():
                     default_roles = [
@@ -76,11 +112,67 @@ def init_db():
     asyncio.run(_init_db())
 
 @app.command()
+def create_admin():
+    """Create the first admin user."""
+    from vilcos.db import AsyncSessionLocal
+    from vilcos.models import User, Role
+
+    async def _create_admin():
+        try:
+            async with AsyncSessionLocal() as session:
+                # First check if admin role exists, if not create it
+                result = await session.execute(select(Role).where(Role.name == "admin"))
+                admin_role = result.scalar_one_or_none()
+                
+                if not admin_role:
+                    admin_role = Role(name="admin", description="Administrator with full access")
+                    session.add(admin_role)
+                    await session.commit()
+                    await session.refresh(admin_role)
+                    console.print("[bold green]Created admin role successfully[/bold green]")
+                
+                # Check if any admin user exists
+                result = await session.execute(
+                    select(User).join(Role).where(Role.name == "admin")
+                )
+                if result.scalar_one_or_none():
+                    console.print("[bold red]An admin user already exists[/bold red]")
+                    raise typer.Exit(1)
+                
+                # Prompt for user details
+                email = typer.prompt("Enter admin email")
+                username = typer.prompt("Enter admin username")
+                password = typer.prompt("Enter admin password", hide_input=True)
+                confirm_password = typer.prompt("Confirm admin password", hide_input=True)
+                
+                if password != confirm_password:
+                    console.print("[bold red]Passwords do not match[/bold red]")
+                    raise typer.Exit(1)
+                
+                # Create the admin user
+                admin_user = User(
+                    email=email,
+                    username=username,
+                    password=User.get_password_hash(password),
+                    role_id=admin_role.id
+                )
+                
+                session.add(admin_user)
+                await session.commit()
+                console.print("[bold green]Admin user created successfully[/bold green]")
+                
+        except Exception as e:
+            console.print(f"[bold red]Error creating admin user: {e}[/bold red]")
+            raise typer.Exit(1)
+    
+    asyncio.run(_create_admin())
+
+@app.command()
 def shell():
     """Launch an interactive shell."""
     try:
         from IPython import embed
-        embed()
+        embed(banner1="Vilcos Shell", user_ns=get_shell_context())
     except ImportError:
         typer.echo("Please install IPython: pip install ipython")
         raise typer.Exit(1)

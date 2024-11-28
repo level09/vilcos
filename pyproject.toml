@@ -20,8 +20,11 @@ dependencies = [
     "uvicorn[standard]>=0.24.0",
     "jinja2>=3.1.2",
     "sqlalchemy>=2.0.23",
+    "pydantic>=2.5.2",
     "pydantic-settings>=2.1.0",
+    "pydantic-core>=2.14.5",
     "python-dotenv>=1.0.0",
+    "starlette>=0.27.0",
     "starlette-session>=0.4.3",
     "aioredis>=2.0.1",
     "greenlet>=3.0.1",
@@ -30,6 +33,8 @@ dependencies = [
     "IPython>=8.17.2",
     "redis>=5.0.1",
     "argon2-cffi>=23.1.0",
+    "email-validator>=2.1.0",  # Required for EmailStr validation
+    "websockets>=12.0",  # Required for WebSocket support
 ]
 
 [project.scripts]
