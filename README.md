@@ -4,12 +4,15 @@ A modern, full-stack web framework built on FastAPI and Vue.js with real-time ca
 
 ## Features ✨
 
-- **Modern UI** - Integrated with Vue 3 + Vuetify for beautiful interfaces
-- **Authentication** - Simple, secure session-based auth with Argon2 password hashing
-- **Database** - Async SQLAlchemy with connection pooling
+- **Modern UI** - Vue 3 + Vuetify 3.7.3 for beautiful, responsive interfaces
+- **Authentication** - Secure session-based auth with Argon2 password hashing and role-based access control
+- **Database** - Async SQLAlchemy with PostgreSQL and connection pooling
 - **API Ready** - FastAPI-powered REST endpoints with automatic OpenAPI docs
 - **Developer Friendly** - CLI tools, hot reloading, and interactive shell
-- **Real-time WebSockets** - Built-in support for multi-channel WebSocket communication
+- **Real-time WebSockets** - Multi-channel WebSocket support with JSON message broadcasting
+- **Session Management** - Redis-backed secure sessions with configurable settings
+- **Role-Based Access** - Built-in user roles (admin/user) with extensible permissions
+- **Modern Frontend** - Material Design Icons, Axios for HTTP requests, and responsive layouts
 
 ## Quick Start 🏃
 
@@ -40,10 +43,32 @@ cp .env.sample .env
 vim .env  # or use your preferred editor
 ```
 
+Required environment variables:
+```env
+# Database Configuration
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
+
+# Security Settings
+SECRET_KEY=your-secure-secret-key
+SESSION_COOKIE_NAME=vilcos_session
+SESSION_COOKIE_MAX_AGE=86400
+SESSION_COOKIE_SECURE=true
+SESSION_COOKIE_SAMESITE=lax
+
+# Redis Configuration
+REDIS_URL=redis://localhost:6379
+```
+
 2. Initialize and run:
 
 ```bash
+# Create database tables and default roles
 vilcos init-db
+
+# Create an admin user (optional)
+vilcos create-admin
+
+# Start the development server
 vilcos run
 ```
 
@@ -84,7 +109,6 @@ Vilcos uses a simple but secure session-based authentication system:
 - `/auth/signin` - User login
 - `/auth/signup` - New user registration
 - `/auth/signout` - User logout
-- `/auth/me` - Get current user info
 
 ### Security Best Practices
 
@@ -104,21 +128,30 @@ python -c "import secrets; print(secrets.token_hex(32))"
 ### WebSockets
 
 ```javascript
-// Connect and send messages
-const ws = new WebSocket('ws://localhost:8000/live/ws/mychannel');
-ws.send(JSON.stringify({ message: 'Hello!' }));
+// Connect to a specific channel
+const ws = new WebSocket('ws://localhost:8000/ws/mychannel');
 
-// Receive messages
-ws.onmessage = (event) => console.log(JSON.parse(event.data));
+// Send JSON messages
+ws.send(JSON.stringify({ 
+    type: 'chat',
+    content: 'Hello everyone!' 
+}));
+
+// Handle incoming messages
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log(`Received at ${data.timestamp}:`, data.data);
+};
 ```
 
 ### CLI Tools
 
 ```bash
 vilcos version          # Show version
-vilcos run             # Development server
-vilcos init-db         # Setup database
-vilcos shell           # Interactive shell
+vilcos run             # Start development server
+vilcos init-db         # Initialize database tables
+vilcos create-admin    # Create admin user
+vilcos shell           # Launch interactive shell
 ```
 
 ## Requirements 📋
@@ -133,7 +166,7 @@ Essential `.env` settings:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
-SECRET_KEY=your-secret-key
+SECRET_KEY=your-secure-secret-key
 REDIS_URL=redis://localhost:6379
 ```
 
