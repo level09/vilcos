@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "vilcos"
-version = "0.1.2"
+dynamic = ["version"]
 description = "A FastAPI-based web framework"
 authors = [{name = "Nidal Alhariri", email = "level09@gmail.com"}]
 readme = "README.md"
