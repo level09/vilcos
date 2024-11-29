@@ -11,7 +11,8 @@ A modern, full-stack web framework built on FastAPI and Vue.js with real-time ca
 - **Developer Friendly** - CLI tools, hot reloading, and interactive shell
 - **Real-time WebSockets** - Multi-channel WebSocket support with JSON message broadcasting
 - **Session Management** - Redis-backed secure sessions with configurable settings
-- **Role-Based Access** - Built-in user roles (admin/user) with extensible permissions
+- **User Management** - Complete user administration with CRUD operations
+- **Role-Based Access** - Flexible role management system with admin interface
 - **Modern Frontend** - Material Design Icons, Axios for HTTP requests, and responsive layouts
 
 ## Quick Start 🏃
@@ -84,12 +85,18 @@ vilcos/
 └── vilcos/            # Main package
     ├── static/        # Static assets
     ├── templates/     # View templates
+    │   ├── admin/    # Admin interface templates
+    │   └── auth/     # Authentication templates
     ├── routes/        # API endpoints and routes
     │   ├── auth.py    # Authentication routes
-    │   └── ws.py      # WebSocket routes
+    │   ├── users.py   # User management routes
+    │   ├── roles.py   # Role management routes
+    │   └── websockets.py  # WebSocket routes
     ├── models.py      # Database models
+    ├── schemas.py     # Pydantic schemas
     ├── config.py      # Application settings
     ├── db.py         # Database configuration and utilities
+    ├── auth_utils.py  # Authentication utilities
     ├── utils.py      # Utility functions
     ├── cli.py        # Command-line interface
     └── app.py        # Application entry point
@@ -109,6 +116,8 @@ Vilcos uses a simple but secure session-based authentication system:
 - `/auth/signin` - User login
 - `/auth/signup` - New user registration
 - `/auth/signout` - User logout
+- `/admin/users` - User management dashboard
+- `/admin/roles` - Role management dashboard
 
 ### Security Best Practices
 
@@ -124,6 +133,22 @@ python -c "import secrets; print(secrets.token_hex(32))"
 - Use strong database passwords
 
 ## Key Features 🔑
+
+### User Management
+
+The framework includes a comprehensive user management system:
+
+- **User Administration**
+  - Create, read, update, and delete users
+  - Manage user roles and permissions
+  - Toggle user activation status
+  - Secure password management
+
+- **Role Management**
+  - Create and manage custom roles
+  - Assign/remove roles from users
+  - Role-based access control for routes
+  - Admin interface for role management
 
 ### WebSockets
 
