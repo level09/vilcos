@@ -133,7 +133,7 @@ def create_admin():
                 
                 # Check if any admin user exists
                 result = await session.execute(
-                    select(User).join(Role).where(Role.name == "admin")
+                    select(User).join(user_roles).join(Role).where(Role.name == "admin")
                 )
                 if result.scalar_one_or_none():
                     console.print("[bold red]An admin user already exists[/bold red]")
@@ -148,13 +148,13 @@ def create_admin():
                 if password != confirm_password:
                     console.print("[bold red]Passwords do not match[/bold red]")
                     raise typer.Exit(1)
-                
+
                 # Create the admin user
                 admin_user = User(
                     email=email,
                     username=username,
                     password=User.get_password_hash(password),
-                    role_id=admin_role.id
+                    roles=[admin_role]  # Updated to use roles list
                 )
                 
                 session.add(admin_user)

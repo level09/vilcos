@@ -14,7 +14,7 @@ class UserSchema(BaseModel):
     id: int
     email: str
     username: str
-    role: RoleSchema
+    roles: list[RoleSchema]
     is_active: bool = True
     created_at: datetime
     updated_at: Optional[datetime] = None

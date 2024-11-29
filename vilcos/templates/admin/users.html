@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block content %}
+<v-main>
+<v-container>
+    <v-data-table
+        :headers="headers"
+        :items="items"
+        class="elevation-1"
+    >
+        <template v-slot:top>
+            <v-toolbar flat>
+                <v-toolbar-title>Users Management</v-toolbar-title>
+                <v-divider class="mx-4" inset vertical></v-divider>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" variant="elevated" dark class="mb-2" @click="createItem">
+                    Add User
+                </v-btn>
+            </v-toolbar>
+        </template>
+
+        <template v-slot:item.roles="{ item }">
+            <v-chip
+                v-for="role in item.roles"
+                :key="role.id"
+                class="ma-1"
+                :color="role.name === 'admin' ? 'red' : 'primary'"
+                text-color="white"
+            >
+                [[ role.name ]]
+            </v-chip>
+        </template>
+
+        <template v-slot:item.actions="{ item }">
+            <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+            <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
+        </template>
+    </v-data-table>
+
+    <!-- User Dialog -->
+    <v-dialog v-model="dialog" max-width="500px">
+        <v-card>
+            <v-card-title>
+                <span class="text-h5">[[ editMode ? 'Edit User' : 'New User' ]]</span>
+            </v-card-title>
+
+            <v-card-text>
+                <v-container>
+                    <v-row>
+                        <v-col cols="12">
+                            <v-text-field v-model="editedItem.username" label="Username"></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field 
+                                v-model="editedItem.password" 
+                                label="Password"
+                                type="password"
+                                :placeholder="editMode ? 'Leave blank to keep current password' : 'Enter password'"
+                            ></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-select
+                                v-model="editedItem.roles"
+                                :items="roles"
+                                item-title="name"
+                                item-value="id"
+                                label="Roles"
+                                multiple
+                                chips
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-switch v-model="editedItem.is_active" label="Active"></v-switch>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="error" variant="text" @click="dialog = false">Cancel</v-btn>
+                <v-btn color="primary" @click="saveItem">Save</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <!-- Snackbar for notifications -->
+    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000">
+        [[ snackbarText ]]
+        <template v-slot:actions>
+            <v-btn variant="text" @click="snackbar = false">Close</v-btn>
+        </template>
+    </v-snackbar>
+</v-container>
+</v-main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const app = Vue.createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+        return {
+            items: [],
+            headers: [
+                { title: 'ID', key: 'id', sortable: true },
+                { title: 'Username', key: 'username', sortable: true },
+                { title: 'Email', key: 'email', sortable: true },
+                { title: 'Roles', key: 'roles', sortable: false },
+                { title: 'Active', key: 'is_active', sortable: true },
+                { title: 'Actions', key: 'actions', sortable: false }
+            ],
+            dialog: false,
+            drawer: false,
+            editMode: false,
+            editedItem: {
+                id: null,
+                email: '',
+                username: '',
+                password: '',
+                roles: [],
+                is_active: true
+            },
+            defaultItem: {
+                id: null,
+                email: '',
+                username: '',
+                password: '',
+                roles: [],
+                is_active: true
+            },
+            roles: [],
+            snackbar: false,
+            snackbarText: '',
+            snackbarColor: 'success'
+        }
+    },
+    mounted() {
+        this.fetchUsers()
+        this.fetchRoles()
+    },
+    methods: {
+        async fetchUsers() {
+            try {
+                const response = await fetch('/api/users')
+                const data = await response.json()
+                this.items = data.items
+            } catch (error) {
+                this.showError('Failed to fetch users')
+            }
+        },
+        async fetchRoles() {
+            try {
+                const response = await fetch('/api/roles')
+                const data = await response.json()
+                this.roles = data.items
+            } catch (error) {
+                this.showError('Failed to fetch roles')
+            }
+        },
+        editItem(item) {
+            this.editMode = true
+            this.editedItem = { ...item }
+            this.editedItem.password = '' // Clear password field for security
+            this.dialog = true
+        },
+        createItem() {
+            this.editMode = false
+            this.editedItem = { ...this.defaultItem }
+            this.dialog = true
+        },
+        async saveItem() {
+            try {
+                const url = this.editMode 
+                    ? `/api/users/${this.editedItem.id}`
+                    : '/api/users'
+                
+                const method = this.editMode ? 'PUT' : 'POST'
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.editedItem)
+                })
+                
+                if (!response.ok) {
+                    throw new Error('Failed to save user')
+                }
+                
+                this.dialog = false
+                this.fetchUsers()
+                this.showSuccess(this.editMode ? 'User updated' : 'User created')
+            } catch (error) {
+                this.showError('Failed to save user')
+            }
+        },
+        async deleteItem(item) {
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return
+            }
+            
+            try {
+                const response = await fetch(`/api/users/${item.id}`, {
+                    method: 'DELETE'
+                })
+                
+                if (!response.ok) {
+                    throw new Error('Failed to delete user')
+                }
+                
+                this.fetchUsers()
+                this.showSuccess('User deleted')
+            } catch (error) {
+                this.showError('Failed to delete user')
+            }
+        },
+        showSuccess(message) {
+            this.snackbarColor = 'success'
+            this.snackbarText = message
+            this.snackbar = true
+        },
+        showError(message) {
+            this.snackbarColor = 'error'
+            this.snackbarText = message
+            this.snackbar = true
+        }
+    }
+})
+
+app.use(vuetify)
+app.mount('#app')
+</script>
+{% endblock %} 

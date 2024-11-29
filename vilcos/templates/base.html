@@ -31,39 +31,30 @@
                     </v-toolbar-title>
                 </v-app-bar>
 
-                <v-navigation-drawer v-model="drawer" app width="310" expand-on-hover>
-                    <v-list density="compact">
-                        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" href="/dashboard"></v-list-item>
-                        
+                <v-navigation-drawer v-model="drawer" app rail width="310" expand-on-hover>
+                    <v-list>
+                        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" value="dashboard"
+                            href="/dashboard"></v-list-item>
+                        <v-list-item prepend-icon="mdi-account" title="Users" value="users"
+                            href="/admin/users"></v-list-item>
                     </v-list>
                 </v-navigation-drawer>
 
-                <v-main>
-                    {% block content %}{% endblock %}
-                </v-main>
 
-                <v-snackbar v-model="snackbar"  :timeout="3000">
-                    ${ snackbarText }
-                    <template v-slot:actions>
-                        <v-btn variant="text" @click="snackbar = false">Close</v-btn>
-                    </template>
-                </v-snackbar>
+                {% block content %}{% endblock %}
             </v-layout>
         </v-app>
     </div>
 
-    <!-- Core JS -->
+    <!-- Vue 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Vuetify -->
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.7.3/dist/vuetify.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <!-- Base App -->
-   
-
-    {% block scripts %}
-    
-    
-    {% endblock %}
+    <!-- Custom Scripts -->
+    <script>
+        const vuetify = Vuetify.createVuetify()
+    </script>
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>

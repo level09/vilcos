@@ -72,7 +72,7 @@ async def signup(
             email=data.email,
             username=data.username,
             password=User.get_password_hash(data.password),
-            role_id=default_role.id
+            roles=[default_role]
         )
         db.add(user)
         await db.commit()
