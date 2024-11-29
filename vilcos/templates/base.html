@@ -31,7 +31,7 @@
                     </v-toolbar-title>
                 </v-app-bar>
 
-                <v-navigation-drawer v-model="drawer" app rail width="310" expand-on-hover>
+                <v-navigation-drawer v-model="drawer" app  width="310" expand-on-hover>
                     <v-list>
                         <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" value="dashboard"
                             href="/dashboard"></v-list-item>
@@ -51,9 +51,7 @@
     <!-- Vuetify -->
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.7.3/dist/vuetify.min.js"></script>
     <!-- Custom Scripts -->
-    <script>
-        const vuetify = Vuetify.createVuetify()
-    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 

@@ -99,6 +99,8 @@
 
 {% block scripts %}
 <script>
+const { createVuetify } = Vuetify;
+const vuetify = createVuetify();
 const app = Vue.createApp({
     delimiters: ['[[', ']]'],
     data() {
@@ -113,7 +115,7 @@ const app = Vue.createApp({
                 { title: 'Actions', key: 'actions', sortable: false }
             ],
             dialog: false,
-            drawer: false,
+            drawer: true,
             editMode: false,
             editedItem: {
                 id: null,
