@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-from vilcos.routes import auth, websockets, users
+from vilcos.routes import auth, websockets, users, roles
 from vilcos.config import settings
 from vilcos.utils import get_root_path
 from vilcos.auth_utils import get_current_user
@@ -19,6 +19,7 @@ templates = Jinja2Templates(directory=os.path.join(get_root_path(), "templates")
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(websockets.router, prefix="/ws", tags=["websockets"])
 app.include_router(users.router, tags=["users"])
+app.include_router(roles.router, tags=["roles"])
 
 # Add session middleware
 app.add_middleware(
