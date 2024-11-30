@@ -1,5 +1,9 @@
 # Vilcos Framework 🚀
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/level09/vilcos/main/.github/images/vilcos.jpg" alt="Vilcos Framework Logo" width="300">
+</p>
+
 A modern, full-stack web framework built on FastAPI and Vue.js with real-time capabilities.
 
 ## Features ✨

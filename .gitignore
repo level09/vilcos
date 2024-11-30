@@ -60,3 +60,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Keep GitHub images
+!.github/images/
+
