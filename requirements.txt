@@ -1,0 +1,5 @@
+chainlit>=2.5.5
+python-dotenv>=1.1.0
+agno>=1.4.4
+openai>=1.77.0
+pydantic>=2.11.4 
