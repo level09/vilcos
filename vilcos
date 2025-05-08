@@ -52,6 +52,30 @@ check_command() {
   fi
 }
 
+# Create default templates if they don't exist
+create_default_templates() {
+  echo -e "${YELLOW}Checking for template files...${NC}"
+  
+  # Create templates directory if it doesn't exist
+  mkdir -p templates/src
+  
+  # Copy default templates if they don't exist
+  if [ ! -f "templates/index.html" ]; then
+    echo -e "${YELLOW}Creating default template files...${NC}"
+    
+    # Copy index.html
+    cp assets/default-templates/index.html templates/
+    
+    # Copy src files
+    cp assets/default-templates/src/main.js templates/src/
+    cp assets/default-templates/src/style.css templates/src/
+    
+    echo -e "${GREEN}Default templates created successfully!${NC}"
+  else
+    echo -e "${GREEN}Template files already exist.${NC}"
+  fi
+}
+
 # Install dependencies
 install_deps() {
   echo -e "${YELLOW}Installing dependencies...${NC}"
@@ -76,18 +100,29 @@ install_deps() {
   echo -e "${YELLOW}Installing npm dependencies...${NC}"
   npm install
   
+  # Create default templates
+  create_default_templates
+  
   echo -e "${GREEN}Dependencies installed successfully!${NC}"
 }
 
 # Start all services
 start_all() {
   echo -e "${YELLOW}Starting Vilcos...${NC}"
+  
+  # Ensure we have default templates
+  create_default_templates
+  
   ./start.sh
 }
 
 # Start only Vite dev server
 start_dev() {
   echo -e "${YELLOW}Starting Vite development server...${NC}"
+  
+  # Ensure we have default templates
+  create_default_templates
+  
   npm run dev
 }
 
@@ -114,7 +149,7 @@ publish_site() {
 deploy_site() {
   echo -e "${YELLOW}Deploying static site with Docker...${NC}"
   chmod +x ./deploy.sh
-  ./deploy.sh
+  ./deploy.sh "$@"
 }
 
 # Clean generated files
@@ -184,7 +219,7 @@ case $COMMAND in
     publish_site
     ;;
   deploy)
-    deploy_site
+    deploy_site "$@"
     ;;
   install)
     install_deps

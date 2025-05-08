@@ -50,6 +50,9 @@ This self-hosted agent acts as your personal web development assistant, understa
     ./vilcos start
     ```
 
+    This will automatically copy default templates to the `templates/` directory if none exist.
+    The `templates/` directory is excluded from git to keep your repository clean.
+
 Then access:
 - **AI Management**: http://localhost:8000 (login: admin/password)
 - **Website Preview**: http://localhost:3000
@@ -111,9 +114,36 @@ Vilcos operates in two distinct modes to support both development/editing and pr
 ### 2. Production Mode (Static Publishing)
 1. **Publish**:
    - When satisfied, publish your site as static files: `./vilcos publish`
-2. **Deploy**:
-   - Deploy the optimized static site: `./vilcos deploy`
+2. **Deploy Locally**:
+   - You have two options for Docker deployment:
+     - **Quick deployment with pre-built files**: `./vilcos deploy -p` (uses existing files in dist/)
+     - **Full deployment from source**: `./vilcos deploy` (builds the site inside Docker)
    - Benefit from improved performance and security
+
+### 3. Cloud Deployment (Fly.io)
+Vilcos includes ready-to-use configuration for deploying to [Fly.io](https://fly.io/), a platform-as-a-service for running applications globally.
+
+1. **Prerequisites**:
+   - Install the [Fly CLI](https://fly.io/docs/hands-on/install-flyctl/): `curl -L https://fly.io/install.sh | sh`
+   - Sign up and authenticate: `flyctl auth signup` or `flyctl auth login`
+
+2. **Deploy to Fly.io**:
+   ```bash
+   # Launch a new app (first time only)
+   fly launch
+   
+   # In the prompts, customize your app name and choose a region
+   # Select 'No' to Postgres and Redis
+   # Select 'Yes' to deploy now
+   ```
+
+3. **For subsequent updates**:
+   ```bash
+   # Redeploy after making changes
+   fly deploy
+   ```
+
+Your site will be available at `https://your-app-name.fly.dev`.
 
 ## Troubleshooting
 

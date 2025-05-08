@@ -70,6 +70,8 @@ Thumbs.db
 
 # Application specific
 templates/
+!assets/default-templates/
+!assets/default-templates/**
 
 # Distribution / packaging
 .Python
