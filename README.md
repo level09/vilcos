@@ -1,27 +1,45 @@
-# Vilcos Website Builder
+# Vilcos: Give Your Site a Built-in, Self-Hosted AI Web Developer
 
-Vilcos is an AI-powered website template manager that lets you create and edit website templates through natural language conversations.
+<p align="center">
+  <img src="./assets/vilcos_logo.png" alt="Vilcos Logo" width="300"/>
+</p>
+
+**Vilcos transforms how you create and manage your website. Instead of a traditional CMS or a separate admin panel, your website gets its own dedicated, self-hosted AI web developer agent. Simply chat with it to build your initial site, make updates, manage content on any page, and evolve your entire project over time – all through natural language!**
+
+Vilcos is an AI-powered framework that empowers you to:
+-   **Create & Build:** Generate new pages and entire site structures.
+-   **Edit & Update:** Modify HTML, CSS (including Tailwind CSS), JavaScript, and importantly, the content within your pages.
+-   **Manage & Evolve:** Iteratively refine your website, add new sections, or change layouts, much like a CMS, but through a conversational interface with your own AI agent.
+
+This self-hosted agent acts as your personal web development assistant, understanding your requests and applying changes directly to your project files.
 
 ## Features
 
-- **AI-Powered Editing**: Use natural language to create and edit website templates
-- **Live Preview**: See changes in real-time as you edit
-- **File Watching**: Automatic synchronization between templates and preview
-- **Static Publishing**: Generate optimized static sites for production
-- **Docker Deployment**: Simple deployment with Docker
+- **AI-Powered Website Management**: Use natural language to create, edit, and manage your entire website – pages, content, and structure.
+- **Live Preview**: See changes in real-time as you interact with your AI agent.
+- **File Watching**: Automatic synchronization for instant feedback during development.
+- **Static Publishing**: Generate optimized static sites ready for production.
+- **Self-Hosted Agent**: You control the core AI agent framework.
+- **Docker Deployment**: Simple deployment option available for the published static site.
 
 ## Quick Start
 
-```bash
-# Make the vilcos script executable
-chmod +x ./vilcos
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/level09/vilcos.git
+    cd vilcos
+    ```
 
-# Install dependencies
-./vilcos install
+2.  **Install Dependencies:**
+    *(Ensure you have Python 3.7+ and Node.js 16+ installed)*
+    ```bash
+    ./vilcos install
+    ```
 
-# Start the application
-./vilcos start
-```
+3.  **Start the Application:**
+    ```bash
+    ./vilcos start
+    ```
 
 Then access:
 - **AI Management**: http://localhost:8000 (login: admin/password)
