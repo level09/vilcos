@@ -36,7 +36,16 @@ This self-hosted agent acts as your personal web development assistant, understa
     ./vilcos install
     ```
 
-3.  **Start the Application:**
+3.  **Configure OpenAI API Key:**
+    Vilcos needs access to the OpenAI API.
+    *   You can set the `OPENAI_API_KEY` environment variable before starting:
+        ```bash
+        export OPENAI_API_KEY='your_api_key_here'
+        ```
+    *   Alternatively, when you run `./vilcos start` for the first time, you will be prompted to enter your API key. This key will be saved to a local `.env` file for future use.
+    You can obtain an API key from [OpenAI Platform](https://platform.openai.com/account/api-keys).
+
+4.  **Start the Application:**
     ```bash
     ./vilcos start
     ```
