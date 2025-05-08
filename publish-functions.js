@@ -5,9 +5,9 @@
  */
 
 // Import required modules
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 /**
  * Optimize HTML files by removing comments and minimizing
@@ -127,7 +127,7 @@ function generateSitemap(directory, baseUrl = 'http://localhost') {
 }
 
 // Export the functions
-module.exports = {
+export {
   optimizeHtml,
   processHtmlFiles,
   createRobotsTxt,

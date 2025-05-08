@@ -17,10 +17,13 @@ echo -e "${NC}"
 
 # Default publish directory
 PUBLISH_DIR="${1:-./public}"
-BASE_URL="${2:-http://localhost}"
 
-# Make the publish directory absolute
+# Make sure public directory exists first
+mkdir -p "$PUBLISH_DIR"
+
+# Now make it absolute
 PUBLISH_DIR=$(realpath "$PUBLISH_DIR")
+BASE_URL="${2:-http://localhost}"
 
 # Ensure npm is installed
 if ! command -v npm &> /dev/null; then
@@ -38,8 +41,8 @@ fi
 if [ ! -f "./post-process.js" ]; then
   echo -e "${YELLOW}Creating post-processing script...${NC}"
   cat > ./post-process.js << 'EOL'
-const { processHtmlFiles, createRobotsTxt, generateSitemap } = require('./publish-functions');
-const path = require('path');
+import { processHtmlFiles, createRobotsTxt, generateSitemap } from './publish-functions.js';
+import path from 'path';
 
 // Get the publish directory from command line args
 const publishDir = process.argv[2];
@@ -76,7 +79,8 @@ mkdir -p "$PUBLISH_DIR"
 
 # Copy all built assets to the publishing directory
 echo -e "${YELLOW}Copying optimized assets to publishing directory...${NC}"
-cp -r dist/* "$PUBLISH_DIR/"
+cp -r dist/templates/* "$PUBLISH_DIR/"
+cp -r dist/assets "$PUBLISH_DIR/"
 
 # Run post-processing with Node.js
 echo -e "${YELLOW}Running post-processing optimizations...${NC}"
@@ -84,7 +88,7 @@ node ./post-process.js "$PUBLISH_DIR" "$BASE_URL"
 
 # Create a Caddyfile for serving the static site
 echo -e "${YELLOW}Creating Caddyfile for production...${NC}"
-cat > "$PUBLISH_DIR/Caddyfile" << 'EOL'
+cat > "${PUBLISH_DIR}/Caddyfile" << 'EOL'
 :80 {
   root * {$SITE_ROOT}
   file_server
@@ -110,7 +114,7 @@ EOL
 
 # Create a docker-compose file for production deployment
 echo -e "${YELLOW}Creating Docker Compose for production...${NC}"
-cat > "$PUBLISH_DIR/compose.yaml" << EOL
+cat > "${PUBLISH_DIR}/compose.yaml" << EOL
 services:
   caddy:
     image: caddy:2-alpine
@@ -133,7 +137,7 @@ EOL
 
 # Create a deployment guide
 echo -e "${YELLOW}Creating deployment instructions...${NC}"
-cat > "$PUBLISH_DIR/DEPLOY.md" << EOL
+cat > "${PUBLISH_DIR}/DEPLOY.md" << EOL
 # Vilcos Static Website Deployment
 
 This directory contains a production-ready static website built with Vilcos.
@@ -169,7 +173,7 @@ EOL
 # Add timestamp to show when the site was published
 echo -e "${YELLOW}Adding publishing information...${NC}"
 PUBLISH_DATE=$(date)
-cat > "$PUBLISH_DIR/VERSION.txt" << EOL
+cat > "${PUBLISH_DIR}/VERSION.txt" << EOL
 Vilcos Static Website
 Published: $PUBLISH_DATE
 Base URL: $BASE_URL

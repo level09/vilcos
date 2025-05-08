@@ -1,5 +1,6 @@
-const { processHtmlFiles, createRobotsTxt, generateSitemap } = require('./publish-functions');
-const path = require('path');
+import { processHtmlFiles, createRobotsTxt, generateSitemap } from './publish-functions.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 // Get the publish directory from command line args
 const publishDir = process.argv[2];
