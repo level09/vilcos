@@ -1,42 +1,93 @@
-# Vilcos - AI-Driven Website Template Editor
+# Vilcos Website Builder
 
-A minimal proof of concept for a website template editor powered by AI.
+Vilcos is an AI-powered website template manager that lets you create and edit website templates through natural language conversations.
 
 ## Features
 
-- **Simple Authentication**: Password-based login for secure access
-- **Template Editing**: Create and edit website templates through natural language
-- **AI-Powered**: Uses OpenAI's GPT models to understand and implement requested changes
-- **File Management**: Restricted file operations for safe template manipulation
+- **AI-Powered Editing**: Use natural language to create and edit website templates
+- **Live Preview**: See changes in real-time as you edit
+- **File Watching**: Automatic synchronization between templates and preview
+- **Static Publishing**: Generate optimized static sites for production
+- **Docker Deployment**: Simple deployment with Docker
 
-## Setup
+## Quick Start
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Set up your environment variables (create a `.env` file):
-   ```
-   OPENAI_API_KEY=your_openai_api_key
-   CHAINLIT_USERNAME=admin
-   CHAINLIT_PASSWORD=password
-   ```
-
-## Running
-
-Start the application with:
 ```bash
-chainlit run app.py
+# Make the vilcos script executable
+chmod +x ./vilcos
+
+# Install dependencies
+./vilcos install
+
+# Start the application
+./vilcos start
 ```
 
-## Usage
+Then access:
+- **AI Management**: http://localhost:8000 (login: admin/password)
+- **Website Preview**: http://localhost:3000
 
-1. Log in with your credentials
-2. The AI assistant will create a default index.html if none exists
-3. Chat with the assistant to create or edit templates:
-   - "Create a new page called about.html"
-   - "Add a contact form to index.html"
-   - "Update the styling to use a dark theme"
+## Using the Application
 
-All template files are stored in the `templates` directory. 
+In the AI Management Interface, you can:
+- Create new pages by clicking "🆕 Create New Page" 
+- Edit existing pages with the "✏️ Edit" buttons
+- Preview your website with the "🔍 Live Preview" button
+- Publish your site with the "📦 Publish Website" button
+
+## Project Structure
+
+```
+vilcos/
+├── app.py                 # Chainlit AI interface
+├── vilcos                 # Main command-line script
+├── start.sh               # Development startup script
+├── watch-templates.js     # Template file watcher
+├── publish.sh             # Static site generator
+├── deploy.sh              # Docker deployment script
+├── templates/             # Website templates (editable)
+│   ├── index.html         # Default template
+│   └── src/               # CSS and JS files
+├── dist/                  # Development build (generated)
+└── public/                # Production build (generated)
+```
+
+## Available Commands
+
+```bash
+./vilcos help      # Show available commands
+./vilcos start     # Start all components
+./vilcos ai        # Start Chainlit AI interface only
+./vilcos dev       # Start website preview only
+./vilcos watch     # Start file watcher only
+./vilcos publish   # Generate static site
+./vilcos deploy    # Deploy with Docker (simple, single container)
+./vilcos logs      # View application logs
+./vilcos clean     # Clean generated files
+```
+
+## Development Workflow
+
+1. **Edit**: Use the AI interface to edit templates
+2. **Preview**: See changes in real-time
+3. **Publish**: Generate static files with `./vilcos publish`
+4. **Deploy**: Deploy with `./vilcos deploy` or manually
+
+For a detailed workflow guide, see [WORKFLOW.md](WORKFLOW.md).
+
+## Troubleshooting
+
+- **OpenAI API Key**: You'll be prompted for your key when starting; get one at https://platform.openai.com/account/api-keys
+- **Port Conflicts**: If ports 8000 or 3000 are in use, edit the port numbers in start.sh
+- **Logs**: Check logs with `./vilcos logs` to diagnose issues
+
+## Requirements
+
+- Python 3.7+
+- Node.js 16+
+- npm 8+
+- OpenAI API key
+
+## License
+
+MIT 
