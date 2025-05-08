@@ -35,6 +35,12 @@ In the AI Management Interface, you can:
 - Preview your website with the "🔍 Live Preview" button
 - Publish your site with the "📦 Publish Website" button
 
+### AI Chat Examples
+- **Create**: "Create a new page called about.html with an about section"
+- **Edit**: "Add a navigation bar to index.html"
+- **Style**: "Update index.html to use a blue color scheme"
+- **List**: "Show me all templates"
+
 ## Project Structure
 
 ```
@@ -68,12 +74,19 @@ vilcos/
 
 ## Development Workflow
 
-1. **Edit**: Use the AI interface to edit templates
-2. **Preview**: See changes in real-time
-3. **Publish**: Generate static files with `./vilcos publish`
-4. **Deploy**: Deploy with `./vilcos deploy` or manually
+Vilcos operates in two distinct modes to support both development/editing and production deployment.
 
-For a detailed workflow guide, see [WORKFLOW.md](WORKFLOW.md).
+### 1. Development Mode (Edit & Preview)
+1. **Develop and Edit**:
+   - Use the AI-powered interface to create/edit templates
+   - Preview changes in real-time
+
+### 2. Production Mode (Static Publishing)
+1. **Publish**:
+   - When satisfied, publish your site as static files: `./vilcos publish`
+2. **Deploy**:
+   - Deploy the optimized static site: `./vilcos deploy`
+   - Benefit from improved performance and security
 
 ## Troubleshooting
 

@@ -6,6 +6,8 @@ from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 from agno.tools.file import FileTools
 import logging # Import logging
+import json
+import subprocess
 
 # --- Modern Agno Knowledge Base Imports ---
 from agno.knowledge.document import DocumentKnowledgeBase
@@ -24,6 +26,51 @@ BASE_DIR = Path(os.getcwd())
 TEMPLATES_DIR = BASE_DIR / "templates"
 # Create templates directory if it doesn't exist
 TEMPLATES_DIR.mkdir(exist_ok=True)
+
+# --- Add publish functionality ---
+async def publish_site():
+    """Run the publish script and return the result"""
+    logging.info("Attempting to publish site...")
+    
+    try:
+        # Get the publish script path
+        publish_script = BASE_DIR / "publish.sh"
+        
+        # Check if the script exists
+        if not publish_script.exists():
+            return "❌ Error: publish.sh script not found. Please make sure it exists in the root directory."
+        
+        # Make the script executable
+        os.chmod(publish_script, 0o755)
+        
+        # Set the publish directory
+        publish_dir = BASE_DIR / "public"
+        
+        # Run the publish script
+        result = subprocess.run(
+            [str(publish_script), str(publish_dir)],
+            capture_output=True,
+            text=True,
+            check=False  # Don't raise exception on non-zero exit
+        )
+        
+        # Check the result
+        if result.returncode == 0:
+            success_message = "✅ Site successfully published to public directory!\n\n"
+            success_message += "To deploy the site:\n"
+            success_message += "1. Navigate to the public directory\n"
+            success_message += "2. Run: `docker compose up -d`\n"
+            success_message += "3. Your site will be available at: http://localhost\n\n"
+            success_message += "See the DEPLOY.md file in the public directory for more options."
+            return success_message
+        else:
+            # If the script failed, return the error
+            return f"❌ Publishing failed with exit code {result.returncode}:\n{result.stderr}"
+    
+    except Exception as e:
+        logging.error(f"Error publishing site: {e}")
+        return f"❌ An error occurred during publishing: {str(e)}"
+# --- End publish functionality ---
 
 # --- Modern Agno Knowledge Base Setup ---
 # Initialize the vector database with Agno's native ChromaDB implementation
@@ -99,19 +146,25 @@ SRC_DIR.mkdir(exist_ok=True)
 def scan_templates_directory():
     """
     Scan the templates directory and return a formatted string with its contents.
+    Only includes relevant files like HTML, CSS, JS.
     """
     template_contents = []
     
+    # Define file types to include
+    relevant_extensions = ['.html', '.css', '.js', '.json', '.svg', '.png', '.jpg', '.jpeg', '.gif']
+    
     # List files in templates root directory
     template_contents.append("Files in templates directory:")
-    root_files = [f.name for f in TEMPLATES_DIR.glob("*") if f.is_file()]
+    root_files = [f.name for f in TEMPLATES_DIR.glob("*") if f.is_file() and 
+                 (f.suffix.lower() in relevant_extensions and not f.name.startswith('.'))]
     for f in sorted(root_files):
         template_contents.append(f"  - {f}")
     
     # List files in src directory if it exists
     if SRC_DIR.exists():
         template_contents.append("\nFiles in templates/src directory:")
-        src_files = [f.name for f in SRC_DIR.glob("*") if f.is_file()]
+        src_files = [f.name for f in SRC_DIR.glob("*") if f.is_file() and 
+                    (f.suffix.lower() in relevant_extensions and not f.name.startswith('.'))]
         for f in sorted(src_files):
             template_contents.append(f"  - {f}")
     
@@ -122,6 +175,30 @@ def get_html_pages():
     Get a list of all HTML pages in the templates directory.
     """
     return [f for f in TEMPLATES_DIR.glob("*.html")]
+
+def get_vilcos_logo_svg():
+    """
+    Get the Vilcos logo as inline SVG code.
+    This makes it easy to include the logo in templates.
+    """
+    logo_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Elegant "V" shape with gradient -->
+  <defs>
+    <linearGradient id="v-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Simple V shape -->
+  <path d="M20,20 L50,80 L80,20" 
+        fill="none" 
+        stroke="url(#v-gradient)" 
+        stroke-width="8" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" />
+</svg>"""
+    return logo_svg
 
 @cl.password_auth_callback
 def auth_callback(username: str, password: str):
@@ -139,7 +216,6 @@ def auth_callback(username: str, password: str):
 @cl.action_callback("view_page")
 async def handle_view_page(action):
     """Handles the 'view_page' action."""
-    logging.info(f"Action received: Name={action.name}, Payload={action.payload}")
     payload = action.payload
     page_name = payload.get("file")
 
@@ -160,7 +236,6 @@ async def handle_view_page(action):
 @cl.action_callback("edit_page")
 async def handle_edit_page(action):
     """Handles the 'edit_page' action."""
-    logging.info(f"Action received: Name={action.name}, Payload={action.payload}")
     payload = action.payload
     page_name = payload.get("file")
 
@@ -174,10 +249,130 @@ async def handle_edit_page(action):
 @cl.action_callback("create_new_page")
 async def handle_create_new_page(action):
     """Handles the 'create_new_page' action."""
-    logging.info(f"Action received: Name={action.name}, Payload={action.payload}")
     await cl.Message(content="Please provide a name for the new page and describe its content.").send()
 
+@cl.action_callback("publish_site")
+async def handle_publish_site(action):
+    """Handles the 'publish_site' action."""
+    # Send a message indicating that publishing is in progress
+    await cl.Message(content="🔄 Publishing site... This may take a moment.").send()
+    
+    # Run the publish operation
+    result = await publish_site()
+    
+    # Send the result
+    await cl.Message(content=result).send()
+
+@cl.action_callback("direct_preview")
+async def handle_direct_preview(action):
+    """Simple handler for the preview action."""
+    preview_url = "http://localhost:3000"
+    await cl.Message(
+        content=f"🌐 [Open website preview]({preview_url})"
+    ).send()
+
 # --- End Specific Action Callbacks ---
+
+def create_action_buttons():
+    """Create a list of action buttons for the UI"""
+    # Get HTML pages for buttons
+    html_pages = get_html_pages()
+    
+    # Create action buttons for each page
+    actions = []
+    for page in html_pages:
+        page_name = page.name
+        # Check if this is the README file
+        if page_name.lower() == 'readme.md' or page_name.lower() == 'readme.html':
+            # Add README view button
+            actions.append(
+                cl.Action(
+                    name="view_page",
+                    value=page_name,
+                    description=f"View the content of {page_name}",
+                    label=f"📚 View {page_name}",
+                    payload={"file": page_name}
+                )
+            )
+            
+            # Add preview button right after README
+            actions.append(
+                cl.Action(
+                    name="direct_preview",
+                    value="direct_preview",
+                    description="Open website preview",
+                    label="🔍 Live Preview",
+                    payload={}
+                )
+            )
+            
+            # Then add the edit button for README
+            actions.append(
+                cl.Action(
+                    name="edit_page",
+                    value=page_name,
+                    description=f"Edit {page_name}",
+                    label=f"✏️ Edit {page_name}",
+                    payload={"file": page_name}
+                )
+            )
+        else:
+            # For non-README files, add view and edit buttons as usual
+            actions.append(
+                cl.Action(
+                    name="view_page",
+                    value=page_name,
+                    description=f"View the content of {page_name}",
+                    label=f"👁️ View {page_name}",
+                    payload={"file": page_name}
+                )
+            )
+            actions.append(
+                cl.Action(
+                    name="edit_page",
+                    value=page_name,
+                    description=f"Edit {page_name}",
+                    label=f"✏️ Edit {page_name}",
+                    payload={"file": page_name}
+                )
+            )
+    
+    # Add button to create a new page
+    actions.append(
+        cl.Action(
+            name="create_new_page",
+            value="new_page",
+            description="Create a new HTML page",
+            label="🆕 Create New Page",
+            payload={"action": "create_new"}
+        )
+    )
+    
+    # Add publish button at the end
+    actions.append(
+        cl.Action(
+            name="publish_site",
+            value="publish",
+            description="Publish the website as static files",
+            label="📦 Publish Website",
+            payload={"action": "publish"}
+        )
+    )
+    
+    # If there's no README, add the preview button here
+    if not any(page.name.lower() in ['readme.md', 'readme.html'] for page in html_pages):
+        # Insert preview button at the beginning of actions
+        actions.insert(0, 
+            cl.Action(
+                name="direct_preview",
+                value="direct_preview",
+                description="Open website preview",
+                label="🔍 Live Preview",
+                payload={}
+            )
+        )
+    
+    return actions
 
 @cl.on_chat_start
 async def start():
@@ -224,6 +419,11 @@ async def start():
             "CSS should use Tailwind classes. Custom CSS goes in /src/style.css.",
             "JavaScript files should be placed in the /src directory.",
             
+            # Logo guidance
+            "For the Vilcos logo, use this inline SVG code:",
+            get_vilcos_logo_svg(),
+            "You can adjust width/height attributes as needed.",
+            
             # Important context
             f"Current directory structure:\n{template_contents}\n"
         ],
@@ -237,42 +437,8 @@ async def start():
     # Store the agent in user session
     cl.user_session.set("agent", agent)
     
-    # Get HTML pages for buttons
-    html_pages = get_html_pages()
-    
-    # Create action buttons for each page
-    actions = []
-    for page in html_pages:
-        page_name = page.name
-        actions.append(
-            cl.Action(
-                name="view_page",  # Generic name
-                value=page_name, # Keep value for potential other uses
-                description=f"View the content of {page_name}",
-                label=f"👁️ View {page_name}",
-                payload={"file": page_name} # Identify file in payload
-            )
-        )
-        actions.append(
-            cl.Action(
-                name="edit_page",  # Generic name
-                value=page_name, # Keep value for potential other uses
-                description=f"Edit {page_name}",
-                label=f"✏️ Edit {page_name}",
-                payload={"file": page_name} # Identify file in payload
-            )
-        )
-    
-    # Add button to create a new page
-    actions.append(
-        cl.Action(
-            name="create_new_page",
-            value="new_page",
-            description="Create a new HTML page",
-            label="🆕 Create New Page",
-            payload={"action": "create_new"}
-        )
-    )
+    # Create action buttons
+    actions = create_action_buttons()
     
     # First message to show the directory structure and page actions
     await cl.Message(
@@ -281,7 +447,7 @@ async def start():
 I'll help you create and edit website templates. Use the buttons below to view or edit existing pages, or tell me what changes you'd like to make.
 
 **Directory Structure:**
-```
+```text
 {template_contents}
 ```
 
@@ -344,6 +510,9 @@ async def main(message: cl.Message):
             chat_history = chat_history[-20:]
             cl.user_session.set("chat_history", chat_history)
         
+        # Send the response and add action buttons back
+        actions = create_action_buttons()
+        response_message.actions = actions
         await response_message.send()
     except Exception as e:
         logging.error(f"Error processing message: {e}")
