@@ -3,32 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Vilcos</title>
-  <script type="module" src="/src/main.js"></script>
+  <title>Vilcos AI Website Builder & Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script type="module" src="./src/main.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <div class="max-w-4xl mx-auto px-4 py-16">
-    <header class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-blue-600 mb-4">Welcome to Your Vilcos Website</h1>
-      <p class="text-lg text-gray-600">Chat with the AI to build and manage your site!</p>
-    </header>
-    
-    <main class="bg-white shadow-md rounded-lg p-8 mb-8">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Getting Started</h2>
-      <p class="mb-4">This is your default template. To modify it, you can:</p>
-      <ol class="list-decimal list-inside space-y-2 mb-6">
-        <li>Use the Chainlit AI interface at <a href="http://localhost:8000" class="text-blue-500 hover:underline">http://localhost:8000</a></li>
-        <li>Directly edit the HTML files in the <code class="bg-gray-100 px-2 py-1 rounded">templates/</code> directory</li>
-      </ol>
-      
-      <p class="bg-blue-50 border-l-4 border-blue-500 p-4 text-blue-700">
-        Try asking the AI to "Add a navigation menu to the top of the page" or "Create an about.html page with my bio"
+<body class="bg-neutral-950 text-white font-sans min-h-screen flex flex-col">
+  <!-- Header/Navbar -->
+  <header class="w-full border-b border-neutral-800 bg-neutral-950/80 backdrop-blur sticky top-0 z-50">
+    <nav class="container max-w-7xl mx-auto flex items-center h-16 px-4 justify-between">
+      <a href="#" class="flex items-center text-white space-x-2">
+        <!-- Simple, elegant SVG V logo -->
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 7L16 25L26 7" stroke="#69eaff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-xl font-bold tracking-tight hidden sm:inline-block">Vilcos</span>
+      </a>
+      <div class="flex gap-5 text-sm font-medium">
+        <a href="#about" class="hover:text-neutral-400 transition">About</a>
+        <a href="#features" class="hover:text-neutral-400 transition">Features</a>
+        <a href="#how-it-works" class="hover:text-neutral-400 transition">How It Works</a>
+        <a href="#contact" class="hover:text-neutral-400 transition">Contact</a>
+      </div>
+    </nav>
+  </header>
+  <main class="flex-1">
+    <section class="container max-w-7xl mx-auto pt-24 pb-10 px-4 text-center">
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+        Build Smarter. <br class="hidden sm:block">Manage Easier.<br>
+        <span class="text-neutral-300 text-3xl md:text-4xl block mt-3">AI-powered Website Creation & Management</span>
+      </h1>
+      <p class="text-lg md:text-xl text-neutral-300 max-w-2xl mx-auto mb-8 font-normal">
+        Vilcos AI revolutionizes how you launch and manage websites. Instantly generate professional, high-converting websites and manage your entire web presence with AI-driven tools—no code, no stress.
       </p>
-    </main>
-    
-    <footer class="text-center text-gray-500 text-sm">
-      <p>Built with Vilcos - Your Website's Built-in AI Web Developer</p>
-    </footer>
-  </div>
+      <div class="flex flex-col sm:flex-row justify-center gap-4 mt-7">
+        <a href="#features" class="inline-block rounded-lg bg-white text-neutral-950 font-semibold px-8 py-3 text-base shadow hover:bg-neutral-200 transition">Explore Features</a>
+        <a href="#contact" class="inline-block rounded-lg border border-white px-8 py-3 text-white font-semibold hover:bg-neutral-900/80 transition">Request Early Access</a>
+      </div>
+    </section>
+    <!-- About -->
+    <section id="about" class="container max-w-6xl mx-auto px-4 py-16 border-b border-neutral-900">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h2 class="text-2xl font-bold mb-4">What is Vilcos AI?</h2>
+          <p class="text-neutral-300 mb-4 text-lg leading-relaxed">
+            Vilcos AI is your all-in-one platform for intelligent website creation, effortless content updates, SEO optimization, and performance monitoring—powered by cutting-edge artificial intelligence.
+          </p>
+          <ul class="text-neutral-400 text-base space-y-2">
+            <li>• AI-generated and editable sites tailored to your brand</li>
+            <li>• Simple, live content & design updates with natural language</li>
+            <li>• Automated SEO and accessibility enhancements</li>
+            <li>• Central dashboard to manage, analyze, and grow</li>
+          </ul>
+        </div>
+        <div class="flex justify-center md:justify-end">
+          <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80" alt="AI website builder interface" class="rounded-2xl shadow-2xl border-4 border-cyan-400/20 bg-neutral-950/70 w-full max-w-lg md:max-w-xl xl:max-w-2xl transition-transform duration-500 hover:scale-105">
+        </div>
+      </div>
+    </section>
+    <!-- Features -->
+    <section id="features" class="container max-w-6xl mx-auto px-4 py-20">
+      <h2 class="text-2xl font-bold mb-10 text-center">AI Website Builder & Manager Features</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-7 text-left hover:shadow-md transition shadow-sm">
+          <h3 class="font-semibold text-lg mb-2">Instant Website Generation</h3>
+          <p class="text-neutral-400">Describe your vision and goals—Vilcos AI designs and builds a beautiful, responsive website instantly.</p>
+        </div>
+        <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-7 text-left hover:shadow-md transition shadow-sm">
+          <h3 class="font-semibold text-lg mb-2">AI Content & Design Edits</h3>
+          <p class="text-neutral-400">Update copy, images, or layouts by chatting with your AI manager for true no-code editing.</p>
+        </div>
+        <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-7 text-left hover:shadow-md transition shadow-sm">
+          <h3 class="font-semibold text-lg mb-2">SEO & Analytics Automation</h3>
+          <p class="text-neutral-400">Built-in tools optimize your rankings, structure, speed, and compliance—hands-free.</p>
+        </div>
+        <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-7 text-left hover:shadow-md transition shadow-sm">
+          <h3 class="font-semibold text-lg mb-2">Central Control Panel</h3>
+          <p class="text-neutral-400">Manage multiple sites, domains, updates, and data—all from a single dashboard powered by AI insights.</p>
+        </div>
+      </div>
+    </section>
+    <!-- How It Works -->
+    <section id="how-it-works" class="container max-w-6xl mx-auto px-4 py-20 border-t border-neutral-900">
+      <h2 class="text-2xl font-bold mb-10 text-center">How It Works</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div class="flex flex-col items-center">
+          <div class="w-14 h-14 flex items-center justify-center bg-white/10 border border-neutral-800 rounded-full mb-4">
+            <span class="text-2xl font-bold text-white">1</span>
+          </div>
+          <h3 class="font-semibold mb-2">Describe & Generate</h3>
+          <p class="text-neutral-400 text-center">Tell Vilcos what you want—industry, style, content—and get a fully-formed, ready-to-edit website instantly.</p>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="w-14 h-14 flex items-center justify-center bg-white/10 border border-neutral-800 rounded-full mb-4">
+            <span class="text-2xl font-bold text-white">2</span>
+          </div>
+          <h3 class="font-semibold mb-2">Edit with AI</h3>
+          <p class="text-neutral-400 text-center">Use plain English to update content, design, and settings. No need for code, plugins, or manual updates.</p>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="w-14 h-14 flex items-center justify-center bg-white/10 border border-neutral-800 rounded-full mb-4">
+            <span class="text-2xl font-bold text-white">3</span>
+          </div>
+          <h3 class="font-semibold mb-2">Launch & Grow</h3>
+          <p class="text-neutral-400 text-center">Publish instantly, manage your sites from the dashboard, and watch as Vilcos AI keeps your site at peak performance.</p>
+        </div>
+      </div>
+    </section>
+    <!-- Contact CTA -->
+    <section id="contact" class="container max-w-4xl mx-auto px-4 py-20 text-center">
+      <h2 class="text-2xl font-bold mb-4">Ready for the AI advantage?</h2>
+      <p class="text-neutral-300 max-w-xl mx-auto mb-8">Request early access to Vilcos AI and start creating, editing, and managing websites with unprecedented ease.</p>
+      <a href="mailto:info@vilcosai.com" class="inline-block bg-white text-neutral-950 font-semibold px-10 py-4 rounded-lg hover:bg-neutral-200 transition">Join the Waitlist</a>
+    </section>
+  </main>
+  <footer class="w-full border-t border-neutral-900 bg-neutral-950 py-5 text-center mt-10">
+    <span class="text-neutral-500 text-sm">&copy; 2025 Vilcos AI. All rights reserved.</span>
+  </footer>
 </body>
-</html> 
+</html>
