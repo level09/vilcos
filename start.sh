@@ -93,6 +93,19 @@ sleep 1
 
 # Start Chainlit
 echo -e "${YELLOW}Starting Chainlit AI interface...${NC}"
+
+# Ensure JWT secret exists and set it as an environment variable
+if [ ! -f "./.chainlit/.jwt_secret" ]; then
+  echo -e "${YELLOW}Chainlit JWT secret missing, creating now...${NC}"
+  mkdir -p .chainlit
+  python3 -c "import secrets; print(secrets.token_hex(32))" > ./.chainlit/.jwt_secret
+  echo -e "${GREEN}Chainlit JWT secret created!${NC}"
+fi
+
+# Export the JWT secret as an environment variable
+export CHAINLIT_AUTH_SECRET=$(cat ./.chainlit/.jwt_secret)
+
+# Start Chainlit
 chainlit run app.py --port 8000 > /tmp/chainlit.log 2>&1 &
 CHAINLIT_PID=$!
 

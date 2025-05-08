@@ -96,6 +96,16 @@ install_deps() {
   echo -e "${YELLOW}Installing Python dependencies...${NC}"
   pip install -r requirements.txt
   
+  # Create Chainlit JWT secret if it doesn't exist
+  if [ ! -f "./.chainlit/.jwt_secret" ]; then
+    echo -e "${YELLOW}Creating Chainlit JWT secret...${NC}"
+    # Make sure .chainlit directory exists
+    mkdir -p .chainlit
+    # Generate and store the JWT secret
+    python3 -c "import secrets; print(secrets.token_hex(32))" > ./.chainlit/.jwt_secret
+    echo -e "${GREEN}Chainlit JWT secret created!${NC}"
+  fi
+  
   # Install npm dependencies
   echo -e "${YELLOW}Installing npm dependencies...${NC}"
   npm install
@@ -112,6 +122,14 @@ start_all() {
   
   # Ensure we have default templates
   create_default_templates
+  
+  # Ensure JWT secret exists
+  if [ ! -f "./.chainlit/.jwt_secret" ]; then
+    echo -e "${YELLOW}Chainlit JWT secret missing, creating now...${NC}"
+    mkdir -p .chainlit
+    python3 -c "import secrets; print(secrets.token_hex(32))" > ./.chainlit/.jwt_secret
+    echo -e "${GREEN}Chainlit JWT secret created!${NC}"
+  fi
   
   ./start.sh
 }
@@ -135,6 +153,15 @@ start_watch() {
 # Start Chainlit
 start_ai() {
   echo -e "${YELLOW}Starting Chainlit AI interface...${NC}"
+  
+  # Ensure JWT secret exists
+  if [ ! -f "./.chainlit/.jwt_secret" ]; then
+    echo -e "${YELLOW}Chainlit JWT secret missing, creating now...${NC}"
+    mkdir -p .chainlit
+    python3 -c "import secrets; print(secrets.token_hex(32))" > ./.chainlit/.jwt_secret
+    echo -e "${GREEN}Chainlit JWT secret created!${NC}"
+  fi
+  
   source .venv/bin/activate
   chainlit run app.py
 }
