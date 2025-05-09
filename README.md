@@ -154,19 +154,16 @@ Vilcos includes ready-to-use configuration for deploying to [Fly.io](https://fly
 
 2. **Deploy to Fly.io**:
    ```bash
-   # Launch a new app (first time only)
+   # First time setup (only once)
    fly launch
    
-   # In the prompts, customize your app name and choose a region
-   # Select 'No' to Postgres and Redis
-   # Select 'Yes' to deploy now
+   # For subsequent deployments:
+   ./vilcos publish       # Generate optimized files in public/
+   cd public              # Navigate to the public directory
+   fly deploy --local-only # Deploy your local files
    ```
 
-3. **For subsequent updates**:
-   ```bash
-   # Redeploy after making changes
-   fly deploy
-   ```
+   The `--local-only` flag ensures your customized templates are used in deployment.
 
 Your site will be available at `https://your-app-name.fly.dev`.
 

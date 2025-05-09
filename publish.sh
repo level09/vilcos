@@ -179,6 +179,52 @@ Published: $PUBLISH_DATE
 Base URL: $BASE_URL
 EOL
 
+# Create a Dockerfile for Fly.io deployment
+echo -e "${YELLOW}Creating Fly.io deployment files...${NC}"
+cat > "${PUBLISH_DIR}/Dockerfile" << 'EOL'
+FROM caddy:2-alpine
+
+WORKDIR /srv
+
+# Copy everything from the current directory
+COPY . /srv/
+
+# Set proper permissions
+RUN chmod -R 755 /srv
+
+# Expose HTTP port
+EXPOSE 80
+EOL
+
+# Create a fly.toml template
+cat > "${PUBLISH_DIR}/fly.toml" << EOL
+app = "vilcos-site"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/"
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+EOL
+
 echo -e "${GREEN}✓ Static site published successfully to: ${PUBLISH_DIR}${NC}"
 echo -e "${BLUE}➤ To deploy, navigate to that directory and run:${NC}"
 echo -e "${YELLOW}   cd \"$PUBLISH_DIR\" && docker compose up -d${NC}"
