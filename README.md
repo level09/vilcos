@@ -1,6 +1,7 @@
-# <img src="https://raw.githubusercontent.com/level09/vilcos/master/assets/vilcos.png" alt="Vilcos Logo" width="100" align="left" style="margin-right: 10px;"/> Vilcos: Give Your Site a Built-in, Self-Hosted AI Web Developer
+# <img src="https://raw.githubusercontent.com/level09/vilcos/master/assets/vilcos.png" alt="Vilcos Logo" width="100" align="left" style="margin-right: 10px;"/> Vilcos: Your Website's AI-Powered Developer & Content Manager
 
-<br clear="all"/>
+&nbsp;
+&nbsp;
 
 **Vilcos transforms how you create and manage your website. Instead of a traditional CMS or a separate admin panel, your website gets its own dedicated, self-hosted AI web developer agent. Simply chat with it to build your initial site, make updates, manage content on any page, and evolve your entire project over time – all through natural language!**
 
