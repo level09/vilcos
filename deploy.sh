@@ -22,17 +22,15 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check if dist directory exists and has been built
-if [ ! -d "dist" ] || [ ! -f "dist/templates/index.html" ]; then
-  echo -e "${YELLOW}Building website assets...${NC}"
-  npm install && npm run build
-fi
+# Parse arguments
+USE_PREBUILT=false
 
-# Make sure index.html exists
-if [ ! -f "dist/templates/index.html" ]; then
-  echo -e "${RED}Error: dist/templates/index.html not found after build. Check your build configuration.${NC}"
-  exit 1
-fi
+while getopts "p" opt; do
+  case $opt in
+    p) USE_PREBUILT=true ;;
+    *) ;;
+  esac
+done
 
 # Define image name and container name
 IMAGE_NAME="vilcos-static"
@@ -50,7 +48,31 @@ docker image prune -f >/dev/null 2>&1
 
 # Build Docker image
 echo -e "${YELLOW}Building Docker image...${NC}"
-docker build -t $IMAGE_NAME -f docker-deploy/Dockerfile .
+if [ "$USE_PREBUILT" = true ]; then
+  # Ensure pre-built files exist if using -p flag
+  if [ ! -d "dist" ] || [ ! -f "dist/templates/index.html" ]; then
+    echo -e "${RED}Error: Pre-built files not found. Run 'npm run build' first or remove the -p flag to build inside Docker.${NC}"
+    exit 1
+  fi
+  
+  echo -e "${YELLOW}Using pre-built files from dist/ directory...${NC}"
+  # Create a temporary simple Dockerfile for pre-built files
+  TMP_DOCKERFILE=$(mktemp)
+  cat > $TMP_DOCKERFILE << 'EOL'
+FROM caddy:2-alpine
+WORKDIR /app
+COPY docker-deploy/Caddyfile /etc/caddy/Caddyfile
+COPY dist/templates/index.html /srv/index.html
+COPY dist/assets/ /srv/assets/
+RUN chmod -R 755 /srv
+EXPOSE 80
+EOL
+  docker build -t $IMAGE_NAME -f $TMP_DOCKERFILE .
+  rm $TMP_DOCKERFILE
+else
+  echo -e "${YELLOW}Building site inside Docker (this might take a bit longer)...${NC}"
+  docker build -t $IMAGE_NAME -f docker-deploy/Dockerfile .
+fi
 
 # Run the container
 echo -e "${YELLOW}Starting container...${NC}"
