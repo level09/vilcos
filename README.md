@@ -1,15 +1,21 @@
-# Vilcos: Give Your Site a Built-in, Self-Hosted AI Web Developer
+# <img src="https://raw.githubusercontent.com/level09/vilcos/master/assets/vilcos.png" alt="Vilcos Logo" width="100" align="left" style="margin-right: 10px;"/> Vilcos: Give Your Site a Built-in, Self-Hosted AI Web Developer
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/level09/vilcos/master/assets/vilcos.png" alt="Vilcos Logo" width="300"/>
-</p>
+<br clear="all"/>
 
 **Vilcos transforms how you create and manage your website. Instead of a traditional CMS or a separate admin panel, your website gets its own dedicated, self-hosted AI web developer agent. Simply chat with it to build your initial site, make updates, manage content on any page, and evolve your entire project over time – all through natural language!**
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/level09/vilcos/master/assets/vilcos-demo.gif" alt="Vilcos Demo" width="80%"/>
+</p>
 
 Vilcos is an AI-powered framework that empowers you to:
 -   **Create & Build:** Generate new pages and entire site structures.
 -   **Edit & Update:** Modify HTML, CSS (including Tailwind CSS), JavaScript, and importantly, the content within your pages.
 -   **Manage & Evolve:** Iteratively refine your website, add new sections, or change layouts, much like a CMS, but through a conversational interface with your own AI agent.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/level09/vilcos/master/assets/vilcos-robot.gif" alt="Vilcos Robot" width="250"/>
+</p>
 
 This self-hosted agent acts as your personal web development assistant, understanding your requests and applying changes directly to your project files.
 
