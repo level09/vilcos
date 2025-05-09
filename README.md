@@ -31,6 +31,24 @@ This self-hosted agent acts as your personal web development assistant, understa
 
 ## Quick Start
 
+### Option 1: Using npx (Recommended)
+
+The fastest way to get started with Vilcos:
+
+```bash
+# Create a new Vilcos project
+npx create-vilcos-app my-website
+
+# Or initialize in the current directory
+npx create-vilcos-app
+
+# Start the application
+cd my-website  # If you specified a project name
+./vilcos start
+```
+
+### Option 2: Manual Installation
+
 1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/level09/vilcos.git
