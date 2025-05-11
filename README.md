@@ -105,11 +105,12 @@ vilcos/
 ├── start.sh               # Development startup script
 ├── watch-templates.js     # Template file watcher
 ├── publish.sh             # Static site generator
-├── deploy.sh              # Docker deployment script
+├── deploy.sh              # One-step deployment script
+├── force-rebuild.sh       # Forces clean template rebuilds
 ├── templates/             # Website templates (editable)
 │   ├── index.html         # Default template
-│   └── src/               # CSS and JS files
-├── dist/                  # Development build (generated)
+│   ├── src/               # CSS and JS source files
+│   └── dist/              # Development build (generated)
 └── public/                # Production build (generated)
 ```
 
@@ -134,14 +135,16 @@ Vilcos operates in two distinct modes to support both development/editing and pr
 ### 1. Development Mode (Edit & Preview)
 1. **Develop and Edit**:
    - Use the AI-powered interface to create/edit templates
-   - Preview changes in real-time
+   - Files are built to `templates/dist/` for development preview
+   - Preview changes in real-time at http://localhost:3000
 
 ### 2. Production Mode (Static Publishing)
 1. **Publish**:
    - When satisfied, publish your site as static files: `./vilcos publish`
+   - This creates optimized files in the `public/` directory with production settings
 2. **Deploy Locally**:
    - You have two options for Docker deployment:
-     - **Quick deployment with pre-built files**: `./vilcos deploy -p` (uses existing files in dist/)
+     - **Quick deployment with pre-built files**: `./vilcos deploy -p` (uses existing files)
      - **Full deployment from source**: `./vilcos deploy` (builds the site inside Docker)
    - Benefit from improved performance and security
 
@@ -157,21 +160,38 @@ Vilcos includes ready-to-use configuration for deploying to [Fly.io](https://fly
    # First time setup (only once)
    fly launch
    
-   # For subsequent deployments:
+   # For subsequent deployments (recommended workflow):
+   ./deploy.sh            # One-step build and deploy
+   
+   # If template changes aren't showing up:
+   ./force-rebuild.sh     # Force a clean rebuild of templates
+   ./deploy.sh            # Then deploy as normal
+   
+   # For advanced users (manual steps):
    ./vilcos publish       # Generate optimized files in public/
    cd public              # Navigate to the public directory
    fly deploy --local-only # Deploy your local files
    ```
 
    The `--local-only` flag ensures your customized templates are used in deployment.
+   
+   > **IMPORTANT**: When making changes to templates (e.g., index.html), always use `./force-rebuild.sh` before deploying to ensure changes are properly detected and built.
 
 Your site will be available at `https://your-app-name.fly.dev`.
 
+## Understanding the Build Process
+
+1. **Development builds** go to `templates/dist/` and are used for the preview server
+2. **Production builds** go to `public/` and include additional optimizations and configurations
+3. When template changes aren't reflected in deployment, use `./force-rebuild.sh` to clear the build cache
+
 ## Troubleshooting
 
+- **Template changes not appearing**: Run `./force-rebuild.sh` followed by `./deploy.sh`
 - **OpenAI API Key**: You'll be prompted for your key when starting; get one at https://platform.openai.com/account/api-keys
 - **Port Conflicts**: If ports 8000 or 3000 are in use, edit the port numbers in start.sh
 - **Logs**: Check logs with `./vilcos logs` to diagnose issues
+- **Content Security Policy**: If embedding external content (YouTube, etc.), check the CSP in `publish.sh`
 
 ## Requirements
 

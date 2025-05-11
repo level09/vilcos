@@ -68,8 +68,8 @@ fi
 echo -e "${YELLOW}Building optimized frontend assets...${NC}"
 npm run build
 
-if [ ! -d "dist" ] || [ ! -d "dist/templates" ]; then
-  echo -e "${RED}Error: Build failed or dist directory structure is incorrect${NC}"
+if [ ! -d "templates/dist" ]; then
+  echo -e "${RED}Error: Build failed or templates/dist directory is missing${NC}"
   exit 1
 fi
 
@@ -79,8 +79,10 @@ mkdir -p "$PUBLISH_DIR"
 
 # Copy all built assets to the publishing directory
 echo -e "${YELLOW}Copying optimized assets to publishing directory...${NC}"
-cp -r dist/templates/* "$PUBLISH_DIR/"
-cp -r dist/assets "$PUBLISH_DIR/"
+cp -r templates/dist/* "$PUBLISH_DIR/"
+if [ -d "templates/dist/assets" ]; then
+  cp -r templates/dist/assets "$PUBLISH_DIR/"
+fi
 
 # Run post-processing with Node.js
 echo -e "${YELLOW}Running post-processing optimizations...${NC}"
@@ -90,7 +92,7 @@ node ./post-process.js "$PUBLISH_DIR" "$BASE_URL"
 echo -e "${YELLOW}Creating Caddyfile for production...${NC}"
 cat > "${PUBLISH_DIR}/Caddyfile" << 'EOL'
 :80 {
-  root * {$SITE_ROOT}
+  root * /srv
   file_server
   
   # Enable compression
@@ -107,7 +109,7 @@ cat > "${PUBLISH_DIR}/Caddyfile" << 'EOL'
     # Restrict embedding
     X-Frame-Options "SAMEORIGIN"
     # Content security policy
-    Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com https://randomuser.me data:;"
+    Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com https://randomuser.me data:; frame-src 'self' https://www.youtube.com; child-src 'self' https://www.youtube.com; script-src 'self' https://www.googletagmanager.com 'unsafe-inline';"
   }
 }
 EOL
@@ -188,6 +190,9 @@ WORKDIR /srv
 
 # Copy everything from the current directory
 COPY . /srv/
+
+# Move the Caddyfile to the correct location
+RUN mv /srv/Caddyfile /etc/caddy/Caddyfile
 
 # Set proper permissions
 RUN chmod -R 755 /srv
