@@ -5,6 +5,12 @@
 
 **Vilcos transforms how you create and manage your website. Instead of a traditional CMS or a separate admin panel, your website gets its own dedicated, self-hosted AI web developer agent. Simply chat with it to build your initial site, make updates, manage content on any page, and evolve your entire project over time – all through natural language!**
 
+## 🎬 Watch Vilcos in Action
+
+[![Vilcos Demo Video](https://img.youtube.com/vi/zdjePVJt8s4/maxresdefault.jpg)](https://www.youtube.com/watch?v=zdjePVJt8s4)
+
+<p align="center"><em>▶️ Click the image above to watch the Vilcos demo video</em></p>
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/level09/vilcos/master/assets/vilcos-demo.gif" alt="Vilcos Demo" width="80%"/>
 </p>
